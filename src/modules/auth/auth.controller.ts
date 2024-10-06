@@ -1,7 +1,7 @@
 import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from '../../constants';
-import { Public } from '../metadata';
+import { Public } from '../../constants/metadata';
 
 @Controller('auth')
 export class AuthController {
