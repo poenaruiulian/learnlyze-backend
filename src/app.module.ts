@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule, DatabaseModule, UsersModule } from './modules';
+import { AuthGuard, AuthModule, DatabaseModule, UsersModule } from './modules';
 import * as dotenv from 'dotenv';
+import { APP_GUARD } from '@nestjs/core';
 
 dotenv.config();
 
@@ -15,6 +16,11 @@ dotenv.config();
     AuthModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}
