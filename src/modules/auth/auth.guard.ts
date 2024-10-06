@@ -9,6 +9,7 @@ import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../../constants/metadata';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { GqlContextType, GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -27,8 +28,17 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    let request = null;
+    const type = context.getType<GqlContextType>();
+
+    if (type === 'http') {
+      request = context.switchToHttp().getRequest(); // For HTTP requests
+    } else {
+      request = GqlExecutionContext.create(context).getContext().req; // For GraphQL requests
+    }
+
     const token = this.extractTokenFromHeader(request);
+
     if (!token) {
       throw new UnauthorizedException();
     }

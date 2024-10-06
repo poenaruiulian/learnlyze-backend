@@ -1,4 +1,3 @@
-import * as process from 'process';
-import { ConfigService } from '@nestjs/config';
-
 export * from './dto';
+export * from './decorators';
+export * from './metadata';

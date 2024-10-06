@@ -7,9 +7,8 @@ import {
   Get,
   Request,
 } from '@nestjs/common';
-import { CreateUserDto } from '../../constants';
+import { CreateUserDto, Public } from '../../constants';
 import { UsersService } from './users.service';
-import { Public } from '../../constants/metadata';
 
 @Controller('user')
 export class UserController {
@@ -24,7 +23,6 @@ export class UserController {
 
   @Get('profile')
   getProfile(@Request() req: any) {
-    console.log(req);
     return req.user;
   }
 }
