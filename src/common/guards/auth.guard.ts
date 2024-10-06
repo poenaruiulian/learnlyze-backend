@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from '../../constants/metadata';
+import { IS_PUBLIC_KEY } from '../decorators';
 import { Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { GqlContextType, GqlExecutionContext } from '@nestjs/graphql';
