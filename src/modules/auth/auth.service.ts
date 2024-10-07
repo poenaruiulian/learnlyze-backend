@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService, User } from '../users';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { LoginDto } from './dto';
+import { handlePasswordDecryption } from './helpers';
 
 @Injectable()
 export class AuthService {
@@ -13,14 +15,16 @@ export class AuthService {
 
   async logIn({
     email,
-    pass,
-  }: {
-    email: string;
-    pass: string;
-  }): Promise<{ access_token: string }> {
+    password: pass,
+  }: LoginDto): Promise<{ access_token: string }> {
     const user: User | null = await this.usersService.findOne(email);
 
-    if (user?.password !== pass || user === null) {
+    const dbPassword = await handlePasswordDecryption(user?.password ?? '');
+    const receivedPass = await handlePasswordDecryption(pass);
+
+    console.log(dbPassword, receivedPass);
+
+    if (dbPassword !== receivedPass || user === null) {
       throw new UnauthorizedException();
     }
 
