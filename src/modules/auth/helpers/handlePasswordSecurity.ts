@@ -1,8 +1,8 @@
-import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
+import { createCipheriv, createDecipheriv, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { Buffer } from 'buffer';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
+import { hash } from 'bcrypt';
 
 const config = async () => {
   const configService = new ConfigService();
@@ -31,7 +31,7 @@ const config = async () => {
 
 export const handlePasswordEncryption = async (value: string) => {
   const saltOrRounds = 10;
-  value = await bcrypt.hash(value, saltOrRounds);
+  value = await hash(value, saltOrRounds);
 
   const { encryptionAlgorithm, key, iv } = await config();
   const cipher = createCipheriv(encryptionAlgorithm, key, iv);
