@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from '../../common';
 import { LoginDto } from './dto';
@@ -11,7 +18,6 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private userService: UsersService,
-    private configService: ConfigService,
   ) {}
 
   @Public()
@@ -29,6 +35,10 @@ export class AuthController {
     createUserDto.password = await handlePasswordEncryption(
       createUserDto.password,
     );
+
+    if (await this.userService.findOne(createUserDto.email)) {
+      throw new BadRequestException('This email is already in use.');
+    }
 
     return this.userService
       .create(createUserDto)
