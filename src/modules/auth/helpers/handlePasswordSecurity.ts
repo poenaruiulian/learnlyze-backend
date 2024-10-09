@@ -2,7 +2,6 @@ import { createCipheriv, createDecipheriv, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { Buffer } from 'buffer';
 import { ConfigService } from '@nestjs/config';
-import { hash } from 'bcrypt';
 
 const config = async () => {
   const configService = new ConfigService();
@@ -29,24 +28,35 @@ const config = async () => {
   };
 };
 
-export const handlePasswordEncryption = async (value: string) => {
-  const saltOrRounds = 10;
-  value = await hash(value, saltOrRounds);
-
+export const handlePasswordEncryption = async (
+  value: string,
+): Promise<string> => {
   const { encryptionAlgorithm, key, iv } = await config();
   const cipher = createCipheriv(encryptionAlgorithm, key, iv);
 
-  return Buffer.concat([cipher.update(value), cipher.final()]).toString();
+  const encrypted = Buffer.concat([
+    cipher.update(value, 'utf8'),
+    cipher.final(),
+  ]);
+  return encrypted.toString('hex');
 };
 
-export const handlePasswordDecryption = async (value: string) => {
-  const { encryptionAlgorithm, key, iv } = await config();
+export const handlePasswordDecryption = async (
+  value: string,
+): Promise<string> => {
+  try {
+    const { encryptionAlgorithm, key, iv } = await config();
 
-  const decipher = createDecipheriv(encryptionAlgorithm, key, iv);
-  const encryptedBuffer = Buffer.from(value, 'hex');
+    const decipher = createDecipheriv(encryptionAlgorithm, key, iv);
+    const encryptedBuffer = Buffer.from(value, 'hex');
 
-  return Buffer.concat([
-    decipher.update(encryptedBuffer),
-    decipher.final(),
-  ]).toString();
+    const decrypted = Buffer.concat([
+      decipher.update(encryptedBuffer),
+      decipher.final(),
+    ]);
+
+    return decrypted.toString('utf8');
+  } catch (error) {
+    throw new Error('Failed to decrypt the password: ' + error.message);
+  }
 };
