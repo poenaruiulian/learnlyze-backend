@@ -22,8 +22,6 @@ export class AuthService {
     const dbPassword = await handlePasswordDecryption(user?.password ?? '');
     const receivedPass = await handlePasswordDecryption(pass);
 
-    console.log(user, dbPassword, receivedPass);
-
     if (dbPassword !== receivedPass || user === null) {
       throw new UnauthorizedException();
     }
