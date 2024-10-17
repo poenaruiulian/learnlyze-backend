@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto';
 import { handlePasswordDecryption } from './helpers';
+import { IncorrectPassword, UserNotFoundException } from '../../common';
 
 @Injectable()
 export class AuthService {
@@ -22,8 +23,10 @@ export class AuthService {
     const dbPassword = await handlePasswordDecryption(user?.password ?? '');
     const receivedPass = await handlePasswordDecryption(pass);
 
-    if (dbPassword !== receivedPass || user === null) {
-      throw new UnauthorizedException();
+    if (user === null) {
+      throw new UserNotFoundException();
+    } else if (dbPassword !== receivedPass) {
+      throw new IncorrectPassword();
     }
 
     const { password, ...result } = user;
