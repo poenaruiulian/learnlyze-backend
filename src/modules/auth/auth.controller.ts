@@ -1,16 +1,13 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Public } from '../../common';
+import {
+  DefaultError,
+  EmailAlreadyInUse,
+  ErrorCodes,
+  Public,
+} from '../../common';
 import { LoginDto } from './dto';
 import { CreateUserDto, UsersService } from '../users';
-import { ConfigService } from '@nestjs/config';
 import { handlePasswordEncryption } from './helpers';
 
 @Controller('auth')
@@ -37,13 +34,16 @@ export class AuthController {
     );
 
     if (await this.userService.findOne(createUserDto.email)) {
-      throw new BadRequestException('This email is already in use.');
+      throw new EmailAlreadyInUse();
     }
 
     return this.userService
       .create(createUserDto)
       .then(({ email, password }) =>
         this.authService.logIn({ email, password }),
-      );
+      )
+      .catch(() => {
+        throw new DefaultError(ErrorCodes.couldNotBeSaved);
+      });
   }
 }
