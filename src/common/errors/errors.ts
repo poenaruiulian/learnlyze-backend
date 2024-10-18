@@ -10,7 +10,7 @@ export const ErrorMessages = {
 export const ErrorDescriptions = {
   userNotFound: 'Please check you credentials and try again.',
   incorrectPassword: 'The password you entered is incorrect. Please try again.',
-  emailAlreadyInUse: '',
+  emailAlreadyInUse: 'Please try again with another email.',
   somethingWentWrong: '',
 };
 
