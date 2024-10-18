@@ -1,0 +1,24 @@
+type Resource {
+    id: Int!
+    step: Int!
+    externalLink: String!
+}
+
+type Step {
+    id: Int!
+    course: Int!
+    parenStep: Int!
+    priority: Int!
+    title: String!
+    description: String!
+}
+
+type Course {
+    id: Int!
+    user: Int!
+    title: String!
+    description: String
+    tag: String
+    startedAt: String!
+    postedDate: String
+}

@@ -5,7 +5,7 @@ import { User } from './entities';
 import { UserResolver } from './graphql';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])], // add this line
+  imports: [TypeOrmModule.forFeature([User])],
   controllers: [],
   providers: [UsersService, UserResolver],
   exports: [UsersService],

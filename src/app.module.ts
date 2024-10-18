@@ -7,6 +7,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DatabaseModule } from './config';
 import { AuthGuard } from './common';
+import { CoursesModule } from './modules/courses';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ dotenv.config();
     }),
     DatabaseModule,
     UsersModule,
+    CoursesModule,
     AuthModule,
   ],
   controllers: [],
