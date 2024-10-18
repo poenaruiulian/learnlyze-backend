@@ -3,6 +3,7 @@ import { CourseGenerationDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course, Resource, Step } from './entities';
+import { generateCourse } from './helpers';
 
 @Injectable()
 export class CoursesService {
@@ -14,6 +15,6 @@ export class CoursesService {
   ) {}
 
   async generateCourse(courseGenerationDto: CourseGenerationDto) {
-    console.log(courseGenerationDto);
+    await generateCourse(courseGenerationDto.description);
   }
 }
