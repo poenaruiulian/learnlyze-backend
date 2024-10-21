@@ -8,6 +8,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DatabaseModule } from './config';
 import { AuthGuard } from './common';
 import { CoursesModule } from './modules/courses';
+import { ResourcesModule } from './modules/resources';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ dotenv.config();
     }),
     DatabaseModule,
     UsersModule,
+    ResourcesModule,
     CoursesModule,
     AuthModule,
   ],

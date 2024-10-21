@@ -2,19 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { CourseGenerationDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Course, Resource, Step } from './entities';
+import { Course, Step } from './entities';
 import { generateCourse } from './helpers';
+import { ResourceService } from '../resources';
 
 @Injectable()
 export class CoursesService {
   constructor(
     @InjectRepository(Course) private courseRepository: Repository<Course>,
     @InjectRepository(Step) private stepRepository: Repository<Step>,
-    @InjectRepository(Resource)
-    private resourceRepository: Repository<Resource>,
   ) {}
 
-  async generateCourse(courseGenerationDto: CourseGenerationDto) {
-    await generateCourse(courseGenerationDto.description);
+  async generateCourse(
+    courseGenerationDto: CourseGenerationDto,
+    resourceService: ResourceService,
+  ) {
+    await generateCourse(courseGenerationDto.description, resourceService);
   }
 }

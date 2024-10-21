@@ -1,6 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Field } from '@nestjs/graphql';
 import { Course } from './course.entity';
+import { Resource } from '../../resources';
 
 @Entity()
 export class Step {
@@ -15,6 +22,10 @@ export class Step {
   @Field(() => Step)
   @ManyToOne(() => Step, (step) => step.id, { nullable: true })
   parentStep: Step;
+
+  @Field(() => Resource)
+  @OneToMany(() => Resource, (resource) => resource.id)
+  resources: Resource[];
 
   @Field()
   @Column()
