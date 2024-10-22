@@ -6,7 +6,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Field } from '@nestjs/graphql';
-import { Course } from './course.entity';
+import { Course } from '../../courses/entities/course.entity';
 import { Resource } from '../../resources';
 
 @Entity()

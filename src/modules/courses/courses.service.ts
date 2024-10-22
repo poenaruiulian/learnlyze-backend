@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CourseGenerationDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Course, Step } from './entities';
+import { Course } from './entities';
 import { generateCourse } from './helpers';
 import { ResourceService } from '../resources';
 
@@ -10,7 +10,6 @@ import { ResourceService } from '../resources';
 export class CoursesService {
   constructor(
     @InjectRepository(Course) private courseRepository: Repository<Course>,
-    @InjectRepository(Step) private stepRepository: Repository<Step>,
   ) {}
 
   async generateCourse(

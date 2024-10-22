@@ -21,4 +21,6 @@ export const generateCourse = async (
   if (!secondFormGeneratedCourse) {
     return null;
   }
+
+  console.log(secondFormGeneratedCourse);
 };

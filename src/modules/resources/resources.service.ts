@@ -28,7 +28,8 @@ export class ResourceService {
       return processed.split(/\s+/).filter((k) => k.length > 1);
     });
 
-    // Construct WHERE clause for flexible matching
+    // Construct WHERE clause for flexible matching - we verify if resource's title or description are alike :keyword{index}
+    // The :keyword{index} is defined through params, the object representing query params
     const whereConditions = processedKeywords.map(
       (_, index) => `
     (
@@ -42,7 +43,7 @@ export class ResourceService {
     query.where(`(${whereConditions.join(' OR ')})`);
 
     // Set up query parameters
-    const params: any = {};
+    const params: Record<string, string> = {};
     processedKeywords.forEach((keyword, index) => {
       // Use LIKE with wildcards for partial matching
       params[`keyword${index}`] = `%${keyword}%`;
