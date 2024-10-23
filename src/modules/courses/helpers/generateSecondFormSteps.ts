@@ -35,7 +35,17 @@ export const generateSecondFormSteps = async (
           resources,
         };
       } else {
-        const data = await resourceService.searchByKeywords(step.keywords);
+        let data = await resourceService
+          .scrappeForResources(step.keywords[0])
+          .catch(() => []);
+
+        if (data.length === 0) {
+          data = await resourceService.searchByKeywords(step.keywords);
+        } else {
+          data.forEach((resource: CreateResourceDto) =>
+            resourceService.create(resource),
+          );
+        }
 
         const resources: Omit<Resource, 'id'>[] = data.map(
           (resource: Resource) => ({
@@ -44,8 +54,6 @@ export const generateSecondFormSteps = async (
             external: resource.external,
           }),
         );
-
-        console.log(resources);
 
         return {
           ...step,

@@ -3,12 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resource } from './entities';
 import { CreateResourceDto } from './dto/CreateResourceDto';
+import { InjectCore, PuppeteerCore } from 'nestjs-pptr';
+import { Page } from 'puppeteer';
+import { fillDataFromPage, scrollPage } from './helpers';
 
 @Injectable()
 export class ResourceService {
   constructor(
     @InjectRepository(Resource)
     private resourceRepository: Repository<Resource>,
+    @InjectCore() private readonly puppeteer: PuppeteerCore,
   ) {}
 
   async searchByKeywords(keywords: string[]): Promise<Resource[]> {
@@ -76,6 +80,52 @@ export class ResourceService {
 
     // Execute the query and return results
     return await query.getMany();
+  }
+
+  async scrappeForResources(keyword: string) {
+    const requestParams = {
+      baseURL: `https://www.youtube.com`,
+      encodedQuery: encodeURI(keyword),
+    };
+
+    const instance = await this.puppeteer.launch('example', {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+      ],
+    });
+    let page: Page | null = null;
+
+    page = await instance.browser.newPage();
+
+    // // Set a more realistic user agent
+    await page.setUserAgent(
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    );
+
+    const URL = `${requestParams.baseURL}/results?search_query=${requestParams.encodedQuery}`;
+
+    await page.goto(URL);
+
+    await page.waitForSelector('#contents > ytd-video-renderer');
+
+    const scrollElements = '#contents > ytd-video-renderer';
+
+    await scrollPage(page, scrollElements);
+
+    await page.setDefaultTimeout(10000);
+
+    const organicResults = await fillDataFromPage(page, requestParams);
+
+    await instance.browser.disconnect();
+
+    await instance.browser.close();
+
+    return organicResults;
   }
   async create(createResourceDto: CreateResourceDto) {
     const resource = new Resource();
