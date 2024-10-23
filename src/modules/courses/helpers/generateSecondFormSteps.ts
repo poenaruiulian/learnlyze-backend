@@ -37,11 +37,18 @@ export const generateSecondFormSteps = async (
       } else {
         let data = await resourceService
           .scrappeForResources(step.keywords[0])
-          .catch(() => []);
+          .catch((error) => {
+            console.log(`DEV_LOG: ${error}`);
+            return [];
+          });
 
         if (data.length === 0) {
+          console.log(
+            'DEV_LOG: The scrapper failed or it did not return anything.',
+          );
           data = await resourceService.searchByKeywords(step.keywords);
         } else {
+          console.log('DEV_LOG: The scrapper succeeded');
           data.forEach((resource: CreateResourceDto) =>
             resourceService.create(resource),
           );

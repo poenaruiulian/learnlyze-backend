@@ -121,9 +121,11 @@ export class ResourceService {
 
     const organicResults = await fillDataFromPage(page, requestParams);
 
-    await instance.browser.disconnect();
-
-    await instance.browser.close();
+    if (page) {
+      await page.close();
+    }
+    await this.puppeteer.destroy(instance);
+    await this.puppeteer.closeAll();
 
     return organicResults;
   }
