@@ -25,5 +25,5 @@ export const generateCourse = async (
   }
 
   console.log(secondFormGeneratedCourse);
-  console.log(secondFormGeneratedCourse.steps[0].resources[0]);
+  console.log(secondFormGeneratedCourse?.steps?.[0]?.resources?.[0]);
 };
