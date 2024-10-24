@@ -14,18 +14,23 @@ export const generateSecondFormSteps = async (
     `https://youtube.googleapis.com/youtube/v3/search?key=${apiKey}&part=snippet&q=${keywords}&relevanceLanguage=en&type=video`;
 
   return await Promise.all(
+    // For each step from the course we want to generate resources
     firstFormGeneratedCourse.steps.map(async (step) => {
+      // We first try to use the YouTube API to fetch the resources
       const response = await fetch(youtubeMainUrl(step.keywords.join(' ')));
 
       if (response.ok) {
+        // If the response returns data
         const data = await response.json();
 
+        // We map through the given data to make it match to our needs
         const resources = data.items.map((item: any) => ({
           title: item.snippet.title,
           description: item.snippet.description,
           external: item.id.videoId,
         }));
 
+        // And save them in the database for easier access
         resources.forEach((resource: CreateResourceDto) =>
           resourceService.create(resource),
         );
@@ -35,6 +40,7 @@ export const generateSecondFormSteps = async (
           resources,
         };
       } else {
+        // In case of failure we still want to give the user resources so we scrappe for them using Puppeteer
         let data = await resourceService
           .scrappeForResources(step.keywords[0])
           .catch((error) => {
@@ -43,12 +49,14 @@ export const generateSecondFormSteps = async (
           });
 
         if (data.length === 0) {
+          // If we fail again to retrieve data for the user we will try and get data from our database, searching through the saved resources
           console.log(
             'DEV_LOG: The scrapper failed or it did not return anything.',
           );
           data = await resourceService.searchByKeywords(step.keywords);
         } else {
           console.log('DEV_LOG: The scrapper succeeded');
+          // In this case we save the data from the scrapper to the database
           data.forEach((resource: CreateResourceDto) =>
             resourceService.create(resource),
           );

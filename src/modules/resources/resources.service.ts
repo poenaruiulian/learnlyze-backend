@@ -88,6 +88,7 @@ export class ResourceService {
       encodedQuery: encodeURI(keyword),
     };
 
+    // We create the instance of the puppeteer
     const instance = await this.puppeteer.launch('example', {
       headless: true,
       args: [
@@ -98,21 +99,27 @@ export class ResourceService {
         '--disable-gpu',
       ],
     });
+
+    // Open a new YouTube page
     let page: Page | null = null;
 
     page = await instance.browser.newPage();
 
-    // // Set a more realistic user agent
+    // Set a more realistic user agent
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
     );
 
+    // We create the search URL based on the given keyword
     const URL = `${requestParams.baseURL}/results?search_query=${requestParams.encodedQuery}`;
 
+    // And we navigate to it
     await page.goto(URL);
 
+    // We wait for all the videos from the rendered page
     await page.waitForSelector('#contents > ytd-video-renderer');
 
+    // And we select them all
     const scrollElements = '#contents > ytd-video-renderer';
 
     await scrollPage(page, scrollElements);

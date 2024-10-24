@@ -7,11 +7,13 @@ export const getSecondFormGeneratedCourse = async (
   firstFormGeneratedCourse: FirstFormGeneratedCourse,
   resourceService: ResourceService,
 ) => {
+  // We generate the steps that includes resources
   let secondFormGeneratedCourseSteps = await generateSecondFormSteps(
     firstFormGeneratedCourse,
     resourceService,
   );
 
+  // And then use AI for further analyzing to give the user the best resources from the found ones above
   const content = await handleOpenAIRequests({
     type: 'secondFormGeneratedCoursePrompt',
     description: JSON.stringify({
