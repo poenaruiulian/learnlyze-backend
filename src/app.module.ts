@@ -8,6 +8,8 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DatabaseModule } from './config';
 import { AuthGuard } from './common';
 import { CoursesModule } from './modules/courses';
+import { ResourcesModule } from './modules/resources';
+import { PuppeteerCore, PuppeteerModule } from 'nestjs-pptr';
 
 dotenv.config();
 
@@ -20,8 +22,10 @@ dotenv.config();
       driver: ApolloDriver,
       typePaths: ['./**/*.graphql'],
     }),
+    PuppeteerModule.forRoot({ launchOptions: { headless: true } }),
     DatabaseModule,
     UsersModule,
+    ResourcesModule,
     CoursesModule,
     AuthModule,
   ],
