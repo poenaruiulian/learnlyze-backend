@@ -1,5 +1,6 @@
-import { FirstFormGeneratedCourse } from '../interfaces';
-import { handleOpenAIRequests } from './handleOpenAIRequests';
+import { FirstFormGeneratedCourse } from '../../interfaces';
+import { handleOpenAIRequests } from '../handleOpenAIRequests';
+import { Logger } from '../../../../common';
 
 export const getFirstFormGeneratedCourse = async (
   description: string,
@@ -13,5 +14,6 @@ export const getFirstFormGeneratedCourse = async (
     return JSON.parse(content);
   }
 
+  Logger.log(`The content is null: ${content}`);
   return null;
 };
