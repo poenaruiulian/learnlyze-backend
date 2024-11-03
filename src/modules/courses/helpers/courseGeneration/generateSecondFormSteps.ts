@@ -1,7 +1,8 @@
 import { ConfigService } from '@nestjs/config';
-import { FirstFormGeneratedCourse } from '../interfaces';
-import { Resource, ResourceService } from '../../resources';
-import { CreateResourceDto } from '../../resources/dto/CreateResourceDto';
+import { FirstFormGeneratedCourse } from '../../interfaces';
+import { Resource, ResourceService } from '../../../resources';
+import { CreateResourceDto } from '../../../resources/dto/CreateResourceDto';
+import { Logger } from '../../../../common';
 
 export const generateSecondFormSteps = async (
   firstFormGeneratedCourse: FirstFormGeneratedCourse,
@@ -12,6 +13,11 @@ export const generateSecondFormSteps = async (
   const apiKey = configService.get<string>('YOUTUBE_API_KEY') ?? '';
   const youtubeMainUrl = (keywords: string) =>
     `https://youtube.googleapis.com/youtube/v3/search?key=${apiKey}&part=snippet&q=${keywords}&relevanceLanguage=en&type=video`;
+
+  if (!firstFormGeneratedCourse.steps) {
+    Logger.error('No steps found from the first step');
+    return null;
+  }
 
   return await Promise.all(
     // For each step from the course we want to generate resources
@@ -44,18 +50,16 @@ export const generateSecondFormSteps = async (
         let data = await resourceService
           .scrappeForResources(step.keywords[0])
           .catch((error) => {
-            console.log(`DEV_LOG: ${error}`);
+            Logger.error(error);
             return [];
           });
 
         if (data.length === 0) {
           // If we fail again to retrieve data for the user we will try and get data from our database, searching through the saved resources
-          console.log(
-            'DEV_LOG: The scrapper failed or it did not return anything.',
-          );
+          Logger.error('The scrapper failed or it did not return anything.');
           data = await resourceService.searchByKeywords(step.keywords);
         } else {
-          console.log('DEV_LOG: The scrapper succeeded');
+          Logger.log('The scrapper succeeded.');
           // In this case we save the data from the scrapper to the database
           data.forEach((resource: CreateResourceDto) =>
             resourceService.create(resource),
@@ -76,5 +80,8 @@ export const generateSecondFormSteps = async (
         };
       }
     }),
-  );
+  ).catch((error) => {
+    Logger.error(error);
+    return null;
+  });
 };

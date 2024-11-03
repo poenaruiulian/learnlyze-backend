@@ -1,1 +1,1 @@
-export * from './generateCourse';
+export * from './courseGeneration';

@@ -5,7 +5,7 @@ export interface SecondFormGeneratedCourse extends FirstFormGeneratedCourse {
     resources: {
       title: string;
       description: string;
-      videoId: string;
+      external: string;
     }[];
   })[];
 }
