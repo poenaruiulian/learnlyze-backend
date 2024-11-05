@@ -6,7 +6,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Field } from '@nestjs/graphql';
-import { Course } from '../../courses/entities/course.entity';
+import { Course } from '../../courses';
 import { Resource } from '../../resources';
 
 @Entity()
@@ -15,17 +15,13 @@ export class Step {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Field(() => Course)
-  @ManyToOne(() => Course, (course) => course.id, { onDelete: 'CASCADE' })
-  course: Course;
+  @Field()
+  @Column({ nullable: true })
+  parentStep?: number;
 
-  @Field(() => Step)
-  @ManyToOne(() => Step, (step) => step.id, { nullable: true })
-  parentStep: Step;
-
-  @Field(() => Resource)
-  @OneToMany(() => Resource, (resource) => resource.id)
-  resources: Resource[];
+  @Field()
+  @Column('int', { array: true })
+  resources: number[];
 
   @Field()
   @Column()

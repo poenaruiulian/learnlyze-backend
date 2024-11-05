@@ -145,4 +145,8 @@ export class ResourceService {
 
     return await this.resourceRepository.save(resource);
   }
+
+  async getResourceByExternal(external: string) {
+    return await this.resourceRepository.findOne({ where: { external } });
+  }
 }

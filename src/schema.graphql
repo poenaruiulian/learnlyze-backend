@@ -3,5 +3,5 @@ type Query {
 }
 
 type Mutation {
-    generateCourse(userId: Int!, description: String): Course
+    generateCourse(description: String): Course
 }

@@ -1,10 +1,10 @@
-import { getFirstFormGeneratedCourse } from './getFirstFormGeneratedCourse';
-import { ResourceService } from '../../../resources';
-import { getSecondFormGeneratedCourse } from './getSecondFormGeneratedCourse';
-import { SecondFormGeneratedCourse } from '../../interfaces';
-import { ThirdFormGeneratedCourse } from '../../interfaces/ThirdFormGeneratedCourse';
-import { getThirdFormGeneratedCourse } from './getThirdFormGeneratedCourse';
-import { Logger } from '../../../../common';
+import {
+  getFirstFormGeneratedCourse,
+  getThirdFormGeneratedCourse,
+  getSecondFormGeneratedCourse,
+} from './courseGeneration';
+import { ResourceService } from '../../resources';
+import { Logger } from '../../../common';
 
 export const generateCourse = async (
   description: string,
@@ -27,14 +27,13 @@ export const generateCourse = async (
   Logger.log('First form generated with success.');
 
   // Based on the keywords we generate the second form that are including resources for the given steps
-  const secondFormGeneratedCourse: SecondFormGeneratedCourse | null =
-    await getSecondFormGeneratedCourse(
-      firstFormGeneratedCourse,
-      resourceService,
-    ).catch((error) => {
-      Logger.error(error);
-      return null;
-    });
+  const secondFormGeneratedCourse = await getSecondFormGeneratedCourse(
+    firstFormGeneratedCourse,
+    resourceService,
+  ).catch((error) => {
+    Logger.error(error);
+    return null;
+  });
 
   if (!secondFormGeneratedCourse) {
     Logger.error('Second form failed to generate.');
@@ -58,6 +57,5 @@ export const generateCourse = async (
 
   Logger.log('Third form generated with success.');
 
-  console.log(thirdFormGeneratedCourse);
-  console.log(thirdFormGeneratedCourse?.steps?.[0]);
+  return thirdFormGeneratedCourse;
 };

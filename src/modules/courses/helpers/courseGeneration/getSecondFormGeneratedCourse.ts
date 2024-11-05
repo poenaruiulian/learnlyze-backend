@@ -26,7 +26,7 @@ export const getSecondFormGeneratedCourse = async (
   const content = await handleOpenAIRequests({
     type: 'secondFormGeneratedCoursePrompt',
     description: JSON.stringify({
-      title: firstFormGeneratedCourse,
+      title: firstFormGeneratedCourse.title,
       steps: secondFormGeneratedCourseSteps,
     }),
   });
@@ -40,7 +40,7 @@ export const getSecondFormGeneratedCourse = async (
       const secondTryContent = await handleOpenAIRequests({
         type: 'secondFormGeneratedCoursePrompt',
         description: JSON.stringify({
-          title: firstFormGeneratedCourse,
+          title: firstFormGeneratedCourse.title,
           steps: secondFormGeneratedCourseSteps,
         }),
       });
