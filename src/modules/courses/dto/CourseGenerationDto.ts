@@ -1,4 +1,4 @@
 export type CourseGenerationDto = {
-  userId: string;
+  userId: number;
   description: string;
 };

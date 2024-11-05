@@ -7,7 +7,8 @@ import {
 } from 'typeorm';
 import { Field } from '@nestjs/graphql';
 import { User } from '../../users';
-import { Resource } from '../../resources/entities/resource.entity';
+import { Resource } from '../../resources';
+import { Step } from '../../steps';
 
 @Entity()
 export class Course {
@@ -15,31 +16,31 @@ export class Course {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Field(() => User)
-  @ManyToOne(() => User, (user) => user.id)
+  @Field()
+  @Column()
   user: number;
 
-  @Field(() => Resource)
-  @OneToMany(() => Resource, (resource) => resource.id)
-  resources: Resource[];
+  @Field()
+  @Column('int', { array: true })
+  steps: number[];
 
   @Field()
   @Column()
   title: string;
 
   @Field()
-  @Column()
-  description: string;
+  @Column({ nullable: true })
+  description?: string;
 
   @Field()
-  @Column()
-  tag: string;
+  @Column({ nullable: true })
+  tag?: string;
 
   @Field()
   @Column()
   startedAt: string;
 
   @Field()
-  @Column()
-  postedDate: string;
+  @Column({ nullable: true })
+  postedDate?: string;
 }
