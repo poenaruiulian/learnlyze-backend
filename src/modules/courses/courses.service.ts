@@ -3,7 +3,7 @@ import { CourseGenerationDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities';
-import { generateCourse } from './helpers';
+import { formatCourseForGraphQL, generateCourse } from './helpers';
 import { ResourceService } from '../resources';
 import { CreateStepDto, StepsService } from '../steps';
 import { Logger } from '../../common';
@@ -45,7 +45,7 @@ export class CoursesService {
       const resourcesIds: number[] = [];
 
       for (const resource of resources) {
-        const response = await resourceService.getResourceByExternal(
+        const response = await resourceService.findOneByExternal(
           resource.external,
         );
         if (response) {
@@ -80,6 +80,9 @@ export class CoursesService {
 
     return await this.courseRepository
       .save(course)
+      .then((response) =>
+        formatCourseForGraphQL(response, stepService, resourceService),
+      )
       .catch((error) => Logger.error(error));
   }
 }

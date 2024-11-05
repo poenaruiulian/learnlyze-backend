@@ -136,6 +136,7 @@ export class ResourceService {
 
     return organicResults;
   }
+
   async create(createResourceDto: CreateResourceDto) {
     const resource = new Resource();
 
@@ -146,7 +147,11 @@ export class ResourceService {
     return await this.resourceRepository.save(resource);
   }
 
-  async getResourceByExternal(external: string) {
+  async findOneByExternal(external: string) {
     return await this.resourceRepository.findOne({ where: { external } });
+  }
+
+  async findOneById(id: number) {
+    return await this.resourceRepository.findOne({ where: { id } });
   }
 }

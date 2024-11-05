@@ -1,12 +1,11 @@
 type Resource {
     id: Int!
-    step: Int!
-    externalLink: String!
+    title: String!
+    external: String!
 }
 
 type Step {
     id: Int!
-    course: Int!
     parenStep: Int!
     priority: Int!
     title: String!
@@ -21,4 +20,14 @@ type Course {
     tag: String
     startedAt: String!
     postedDate: String
+}
+
+type FullStep {
+    details: Step!
+    resources: [Resource]
+}
+
+type FullCourse {
+    details: Course!
+    steps: [FullStep]
 }
