@@ -26,9 +26,6 @@ export const generateCourse = async (
 
   Logger.log('First form generated with success.');
 
-  console.log('FIRST');
-  console.log(firstFormGeneratedCourse);
-
   // Based on the keywords we generate the second form that are including resources for the given steps
   const secondFormGeneratedCourse = await getSecondFormGeneratedCourse(
     firstFormGeneratedCourse,
@@ -45,9 +42,6 @@ export const generateCourse = async (
 
   Logger.log('Second form generated with success.');
 
-  console.log('SECOND');
-  console.log(secondFormGeneratedCourse);
-
   // We generate the third and final form that includes a detailed description in HTML format that will be handled accordingly on the front end
   const thirdFormGeneratedCourse = await getThirdFormGeneratedCourse(
     secondFormGeneratedCourse!,
@@ -60,9 +54,6 @@ export const generateCourse = async (
     Logger.error('Third form failed to generate.');
     return null;
   }
-
-  console.log('THRID');
-  console.log(thirdFormGeneratedCourse);
 
   Logger.log('Third form generated with success.');
 

@@ -7,6 +7,8 @@ import { generateCourse } from './helpers';
 import { ResourceService } from '../resources';
 import { CreateStepDto, StepsService } from '../steps';
 import { Logger } from '../../common';
+import * as process from 'process';
+import { courseExample } from './constants';
 
 @Injectable()
 export class CoursesService {
@@ -19,10 +21,16 @@ export class CoursesService {
     resourceService: ResourceService,
     stepService: StepsService,
   ) {
-    const newCourse = await generateCourse(
-      courseGenerationDto.description,
-      resourceService,
-    );
+    const args = process.argv.slice(2);
+    const shouldReturnTestCourse = args.includes('test-course');
+
+    if (shouldReturnTestCourse) {
+      Logger.log('Test course will be returned.');
+    }
+
+    const newCourse = shouldReturnTestCourse
+      ? courseExample
+      : await generateCourse(courseGenerationDto.description, resourceService);
 
     if (!newCourse) {
       Logger.error('Final form of the course is null');
@@ -56,11 +64,8 @@ export class CoursesService {
       const savedStep = await stepService.create(createStepDto);
       if (savedStep) {
         stepsIds.push(savedStep.id);
-        Logger.log('Saved the step in database');
       }
     }
-
-    Logger.log(`Saved steps ids: ${stepsIds}`);
 
     const course = new Course();
     const { title } = newCourse;
@@ -72,10 +77,6 @@ export class CoursesService {
     course.description = undefined;
     course.startedAt = new Date().toString();
     course.postedDate = undefined;
-
-    Logger.log(Object.keys(title).join(' '));
-    Logger.log(Object.keys(newCourse).join(' '));
-    console.log({ ...newCourse });
 
     return await this.courseRepository
       .save(course)
