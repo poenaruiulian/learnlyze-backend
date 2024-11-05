@@ -22,4 +22,8 @@ export class StepsService {
 
     return await this.stepRepository.save(step);
   }
+
+  async findOneById(id: number) {
+    return this.stepRepository.findOne({ where: { id } });
+  }
 }
