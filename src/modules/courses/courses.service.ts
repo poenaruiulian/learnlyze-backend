@@ -3,17 +3,24 @@ import { CourseGenerationDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities';
-import { formatCourseForGraphQL, generateCourse } from './helpers';
+import {
+  formatCourseForGraphQL,
+  generateCourse,
+  getFullCourse,
+} from './helpers';
 import { ResourceService } from '../resources';
 import { CreateStepDto, StepsService } from '../steps';
 import { Logger } from '../../common';
 import * as process from 'process';
 import { courseExample } from './constants';
+import moment from 'moment';
 
 @Injectable()
 export class CoursesService {
   constructor(
     @InjectRepository(Course) private courseRepository: Repository<Course>,
+    private resourceService: ResourceService,
+    private stepService: StepsService,
   ) {}
 
   async generateCourse(
@@ -76,6 +83,7 @@ export class CoursesService {
     course.tag = undefined;
     course.description = undefined;
     course.startedAt = new Date().toString();
+    course.lastAccessed = new Date().toString();
     course.postedDate = undefined;
 
     return await this.courseRepository
@@ -90,15 +98,7 @@ export class CoursesService {
     return this.courseRepository.findBy({ user });
   }
 
-  async getCourseById({
-    courseId,
-    stepService,
-    resourceService,
-  }: {
-    courseId: number;
-    stepService: StepsService;
-    resourceService: ResourceService;
-  }) {
+  async getCourseById({ courseId }: { courseId: number }) {
     const courseDetails = await this.courseRepository.findOneBy({
       id: courseId,
     });
@@ -108,30 +108,23 @@ export class CoursesService {
       return;
     }
 
-    const courseSteps = await Promise.all(
-      courseDetails.steps.map(async (stepId) => {
-        const stepDetails = await stepService.findOneById(stepId);
+    return getFullCourse(courseDetails, this.stepService, this.resourceService);
+  }
 
-        if (!stepDetails) {
-          return null;
-        }
+  async accessCourse({ courseId }: { courseId: number }) {
+    let existingCourse = await this.courseRepository.findOneBy({
+      id: courseId,
+    });
 
-        const resources = await Promise.all(
-          stepDetails.resources.map(
-            async (resourceId) => await resourceService.findOneById(resourceId),
-          ),
-        );
+    if (!existingCourse) {
+      // TODO Handle error
+      return null;
+    }
 
-        return {
-          details: stepDetails,
-          resources,
-        };
-      }),
-    );
+    console.log(existingCourse.lastAccessed);
+    existingCourse.lastAccessed = new Date().toString();
+    console.log(existingCourse.lastAccessed);
 
-    return {
-      details: courseDetails,
-      steps: courseSteps,
-    };
+    return this.courseRepository.save(existingCourse);
   }
 }

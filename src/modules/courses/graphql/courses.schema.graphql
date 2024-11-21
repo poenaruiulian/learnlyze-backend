@@ -19,6 +19,7 @@ type Course {
     description: String
     tag: String
     startedAt: String!
+    lastAccessed: String!
     postedDate: String
 }
 

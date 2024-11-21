@@ -48,7 +48,7 @@ export class CoursesResolver {
   @Mutation()
   async getCourseById(
     @RequestGraphql() req: any,
-    @Args({ name: 'courseId', type: () => String }) courseId: number,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
     const user = await this.userService.findOne(req.user['email']);
 
@@ -59,8 +59,16 @@ export class CoursesResolver {
 
     return this.coursesService.getCourseById({
       courseId,
-      stepService: this.stepService,
-      resourceService: this.resourceService,
+    });
+  }
+
+  @Mutation()
+  async accessCourse(
+    @RequestGraphql() req: any,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
+  ) {
+    return this.coursesService.accessCourse({
+      courseId,
     });
   }
 }

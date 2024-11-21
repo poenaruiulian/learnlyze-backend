@@ -3,5 +3,9 @@ type Mutation {
 }
 
 type Mutation {
-    getCourseById(courseId: Int): FullCourse
+    getCourseById(courseId: Int!): FullCourse
+}
+
+type Mutation {
+    accessCourse(courseId: Int!): Course
 }

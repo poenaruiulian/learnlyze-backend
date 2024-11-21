@@ -36,6 +36,7 @@
     "dotenv": "^16.4.5",
     "graphql": "^16.9.0",
     "graphql-tools": "^9.0.1",
+    "moment": "^2.30.1",
     "nestjs-pptr": "^2.0.1",
     "openai": "^4.68.0",
     "pg": "^8.13.0",
