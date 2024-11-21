@@ -1,4 +1,4 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CoursesService } from '../courses.service';
 import { Course } from '../entities';
 import { ResourceService } from '../../resources';
@@ -32,5 +32,16 @@ export class CoursesResolver {
       this.resourceService,
       this.stepService,
     );
+  }
+
+  @Query()
+  async getCourses(@RequestGraphql() req: any) {
+    const user = await this.userService.findOne(req.user['email']);
+
+    if (!user) {
+      //TODO Throw error on front end
+      return null;
+    }
+    return this.coursesService.getCourses({ userId: user.id });
   }
 }

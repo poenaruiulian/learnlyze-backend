@@ -85,4 +85,8 @@ export class CoursesService {
       )
       .catch((error) => Logger.error(error));
   }
+
+  async getCourses({ userId: user }: { userId: number }) {
+    return this.courseRepository.findBy({ user });
+  }
 }
