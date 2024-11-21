@@ -41,6 +41,10 @@ export class Course {
   startedAt: string;
 
   @Field()
+  @Column()
+  lastAccessed: string;
+
+  @Field()
   @Column({ nullable: true })
   postedDate?: string;
 }

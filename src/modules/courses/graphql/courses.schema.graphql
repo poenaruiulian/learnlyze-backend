@@ -6,7 +6,7 @@ type Resource {
 
 type Step {
     id: Int!
-    parenStep: Int!
+    parentStep: Int
     priority: Int!
     title: String!
     description: String!
@@ -19,6 +19,7 @@ type Course {
     description: String
     tag: String
     startedAt: String!
+    lastAccessed: String!
     postedDate: String
 }
 

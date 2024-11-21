@@ -3,17 +3,24 @@ import { CourseGenerationDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities';
-import { formatCourseForGraphQL, generateCourse } from './helpers';
+import {
+  formatCourseForGraphQL,
+  generateCourse,
+  getFullCourse,
+} from './helpers';
 import { ResourceService } from '../resources';
 import { CreateStepDto, StepsService } from '../steps';
 import { Logger } from '../../common';
 import * as process from 'process';
 import { courseExample } from './constants';
+import moment from 'moment';
 
 @Injectable()
 export class CoursesService {
   constructor(
     @InjectRepository(Course) private courseRepository: Repository<Course>,
+    private resourceService: ResourceService,
+    private stepService: StepsService,
   ) {}
 
   async generateCourse(
@@ -76,6 +83,7 @@ export class CoursesService {
     course.tag = undefined;
     course.description = undefined;
     course.startedAt = new Date().toString();
+    course.lastAccessed = new Date().toString();
     course.postedDate = undefined;
 
     return await this.courseRepository
@@ -84,5 +92,39 @@ export class CoursesService {
         formatCourseForGraphQL(response, stepService, resourceService),
       )
       .catch((error) => Logger.error(error));
+  }
+
+  async getCourses({ userId: user }: { userId: number }) {
+    return this.courseRepository.findBy({ user });
+  }
+
+  async getCourseById({ courseId }: { courseId: number }) {
+    const courseDetails = await this.courseRepository.findOneBy({
+      id: courseId,
+    });
+
+    if (!courseDetails) {
+      // TODO Handle error
+      return;
+    }
+
+    return getFullCourse(courseDetails, this.stepService, this.resourceService);
+  }
+
+  async accessCourse({ courseId }: { courseId: number }) {
+    let existingCourse = await this.courseRepository.findOneBy({
+      id: courseId,
+    });
+
+    if (!existingCourse) {
+      // TODO Handle error
+      return null;
+    }
+
+    console.log(existingCourse.lastAccessed);
+    existingCourse.lastAccessed = new Date().toString();
+    console.log(existingCourse.lastAccessed);
+
+    return this.courseRepository.save(existingCourse);
   }
 }
