@@ -152,6 +152,6 @@ export class ResourceService {
   }
 
   async findOneById(id: number) {
-    return await this.resourceRepository.findOne({ where: { id } });
+    return await this.resourceRepository.findOneBy({ id });
   }
 }

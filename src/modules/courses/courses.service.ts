@@ -89,4 +89,49 @@ export class CoursesService {
   async getCourses({ userId: user }: { userId: number }) {
     return this.courseRepository.findBy({ user });
   }
+
+  async getCourseById({
+    courseId,
+    stepService,
+    resourceService,
+  }: {
+    courseId: number;
+    stepService: StepsService;
+    resourceService: ResourceService;
+  }) {
+    const courseDetails = await this.courseRepository.findOneBy({
+      id: courseId,
+    });
+
+    if (!courseDetails) {
+      // TODO Handle error
+      return;
+    }
+
+    const courseSteps = await Promise.all(
+      courseDetails.steps.map(async (stepId) => {
+        const stepDetails = await stepService.findOneById(stepId);
+
+        if (!stepDetails) {
+          return null;
+        }
+
+        const resources = await Promise.all(
+          stepDetails.resources.map(
+            async (resourceId) => await resourceService.findOneById(resourceId),
+          ),
+        );
+
+        return {
+          details: stepDetails,
+          resources,
+        };
+      }),
+    );
+
+    return {
+      details: courseDetails,
+      steps: courseSteps,
+    };
+  }
 }

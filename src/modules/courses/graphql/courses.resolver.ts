@@ -44,4 +44,23 @@ export class CoursesResolver {
     }
     return this.coursesService.getCourses({ userId: user.id });
   }
+
+  @Mutation()
+  async getCourseById(
+    @RequestGraphql() req: any,
+    @Args({ name: 'courseId', type: () => String }) courseId: number,
+  ) {
+    const user = await this.userService.findOne(req.user['email']);
+
+    if (!user) {
+      //TODO Throw error on front end
+      return null;
+    }
+
+    return this.coursesService.getCourseById({
+      courseId,
+      stepService: this.stepService,
+      resourceService: this.resourceService,
+    });
+  }
 }

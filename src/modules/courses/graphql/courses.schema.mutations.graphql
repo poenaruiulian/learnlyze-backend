@@ -1,3 +1,7 @@
 type Mutation {
     generateCourse(description: String): FullCourse
 }
+
+type Mutation {
+    getCourseById(courseId: Int): FullCourse
+}
