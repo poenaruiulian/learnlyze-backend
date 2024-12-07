@@ -1,15 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule, UsersModule } from './modules';
+import {
+  AuthModule,
+  UsersModule,
+  CoursesModule,
+  ResourcesModule,
+  StepsModule,
+} from './modules';
 import * as dotenv from 'dotenv';
 import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { DatabaseModule } from './config';
 import { AuthGuard } from './common';
-import { CoursesModule } from './modules/courses';
-import { ResourcesModule } from './modules/resources';
-import { PuppeteerCore, PuppeteerModule } from 'nestjs-pptr';
+import { PuppeteerModule } from 'nestjs-pptr';
 
 dotenv.config();
 
@@ -28,6 +32,7 @@ dotenv.config();
     ResourcesModule,
     CoursesModule,
     AuthModule,
+    StepsModule,
   ],
   controllers: [],
   providers: [

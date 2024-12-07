@@ -34,4 +34,8 @@ export class Step {
   @Field()
   @Column()
   description: string;
+
+  @Field()
+  @Column()
+  completed: boolean;
 }

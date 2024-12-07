@@ -47,4 +47,8 @@ export class Course {
   @Field()
   @Column({ nullable: true })
   postedDate?: string;
+
+  @Field()
+  @Column()
+  completedSteps: number;
 }

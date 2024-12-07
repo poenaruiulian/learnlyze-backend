@@ -1,17 +1,3 @@
-type Resource {
-    id: Int!
-    title: String!
-    external: String!
-}
-
-type Step {
-    id: Int!
-    parentStep: Int
-    priority: Int!
-    title: String!
-    description: String!
-}
-
 type Course {
     id: Int!
     user: Int!
@@ -21,11 +7,7 @@ type Course {
     startedAt: String!
     lastAccessed: String!
     postedDate: String
-}
-
-type FullStep {
-    details: Step!
-    resources: [Resource]
+    completedSteps: Int!
 }
 
 type FullCourse {
