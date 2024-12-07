@@ -1,0 +1,5 @@
+type Mutation {
+    changeStepState(courseId: Int!, stepId: Int!): Step
+}
+
+

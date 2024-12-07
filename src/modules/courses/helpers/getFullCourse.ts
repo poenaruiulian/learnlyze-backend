@@ -7,12 +7,18 @@ export const getFullCourse = async (
   stepService: StepsService,
   resourceService: ResourceService,
 ) => {
+  let completedSteps = 0;
+
   const courseSteps = await Promise.all(
     course.steps.map(async (stepId) => {
       const stepDetails = await stepService.findOneById(stepId);
 
       if (!stepDetails) {
         return null;
+      }
+
+      if (stepDetails.completed) {
+        completedSteps = completedSteps + 1;
       }
 
       const resources = await Promise.all(
@@ -31,5 +37,6 @@ export const getFullCourse = async (
   return {
     details: course,
     steps: courseSteps,
+    completedSteps,
   };
 };

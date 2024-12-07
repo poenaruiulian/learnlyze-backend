@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CourseGenerationDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,6 +14,7 @@ import { Logger } from '../../common';
 import * as process from 'process';
 import { courseExample } from './constants';
 import moment from 'moment';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CoursesService {
@@ -85,6 +86,7 @@ export class CoursesService {
     course.startedAt = new Date().toString();
     course.lastAccessed = new Date().toString();
     course.postedDate = undefined;
+    course.completedSteps = 0;
 
     return await this.courseRepository
       .save(course)
@@ -121,9 +123,30 @@ export class CoursesService {
       return null;
     }
 
-    console.log(existingCourse.lastAccessed);
     existingCourse.lastAccessed = new Date().toString();
-    console.log(existingCourse.lastAccessed);
+
+    return this.courseRepository.save(existingCourse);
+  }
+
+  @OnEvent('step.changed')
+  async changeCompletedSteps({
+    courseId,
+    completed,
+  }: {
+    courseId: number;
+    completed: boolean;
+  }) {
+    let existingCourse = await this.courseRepository.findOneBy({
+      id: courseId,
+    });
+
+    if (!existingCourse) {
+      // TODO Handle error
+      return null;
+    }
+
+    existingCourse.completedSteps =
+      existingCourse.completedSteps + (completed ? 1 : -1);
 
     return this.courseRepository.save(existingCourse);
   }

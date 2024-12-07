@@ -1,0 +1,5 @@
+type Resource {
+    id: Int!
+    title: String!
+    external: String!
+}

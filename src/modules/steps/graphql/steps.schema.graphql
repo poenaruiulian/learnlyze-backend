@@ -1,0 +1,14 @@
+type Step {
+    id: Int!
+    parentStep: Int
+    priority: Int!
+    title: String!
+    description: String!
+    completed: Boolean!
+}
+
+type FullStep {
+    details: Step!
+    resources: [Resource]
+}
+
