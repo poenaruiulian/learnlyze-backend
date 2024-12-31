@@ -31,7 +31,8 @@ const firstFormGeneratedCoursePrompt = (description: string) => `
     Output example: I will give you an example regarding how the answer should look. The answer should be just a stringyfied JSON object from a JSON object looking like so:
     {"title": "Learning C/C++","steps": [{"number": 1,"title": "Variables and how to initialize them","keywords": ["C/C++ variables", "C/C++ data types"],},{"number": 2,"title": "Operators in C/C++","keywords": ["C/C++ operators", "arithmetic operators", "logical operators"]}}
     The above is an example of how the data must be structured. 
-  
+    
+    Ensure that the response is a valid JSON string. Before returning the response, internally validate it to make sure it can be parsed by \`JSON.parse()\` without errors.
 `;
 
 const secondFormGeneratedCoursePrompt = (description: string) => `
@@ -54,7 +55,9 @@ const secondFormGeneratedCoursePrompt = (description: string) => `
       ERROR [ExceptionsHandler] Expected ',' or ']' after array element in JSON at position... 
       SyntaxError: Unexpected token '\`', \\"\`\`\`json
    
-  Output example: The output should look identical as structure with input, but a shorter list of resources. The list of resources is shorter because you will be selecting the 3 (or 2) best resources for the user to follow for that specific step. 
+  Output example: The output should look identical as structure with input, but a shorter list of resources. The list of resources is shorter because you will be selecting the 3 (or 2) best resources for the user to follow for that specific step.
+  
+  Ensure that the response is a valid JSON string. Before returning the response, internally validate it to make sure it can be parsed by \`JSON.parse()\` without errors. 
 `;
 
 const generateDescriptionTitleBasedPrompt = (description: string) => `
@@ -94,7 +97,6 @@ const generateDescriptionTitleBasedPrompt = (description: string) => `
     "<p>Templates in C++ allow functions and classes to work with any data type, making code flexible and reusable. By using <b>templates</b>, you can write a function or class once and use it with different data types without rewriting the code...</p><h3>Another Title Example</h3><p>Here is another detailed explanation</p> ...",
   
   Note: Each item in the list should correspond directly to a title in the provided list, and each HTML string should be a standalone description that can be displayed independently in the application.
-
 `;
 
 export const handleOpenAIRequests = async ({

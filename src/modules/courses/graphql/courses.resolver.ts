@@ -4,7 +4,7 @@ import { Course } from '../entities';
 import { ResourceService } from '../../resources';
 import { StepsService } from '../../steps';
 import { UsersService } from '../../users';
-import { RequestGraphql } from '../../../common';
+import { RequestGraphql, UserNotFoundException } from '../../../common';
 
 @Resolver(() => Course)
 export class CoursesResolver {
@@ -23,8 +23,7 @@ export class CoursesResolver {
     const user = await this.userService.findOne(req.user['email']);
 
     if (!user) {
-      //TODO Throw error on front end
-      return null;
+      throw new UserNotFoundException();
     }
 
     return this.coursesService.generateCourse(
@@ -39,8 +38,7 @@ export class CoursesResolver {
     const user = await this.userService.findOne(req.user['email']);
 
     if (!user) {
-      //TODO Throw error on front end
-      return null;
+      throw new UserNotFoundException();
     }
     return this.coursesService.getCourses({ userId: user.id });
   }
@@ -53,8 +51,7 @@ export class CoursesResolver {
     const user = await this.userService.findOne(req.user['email']);
 
     if (!user) {
-      //TODO Throw error on front end
-      return null;
+      throw new UserNotFoundException();
     }
 
     return this.coursesService.getCourseById({
