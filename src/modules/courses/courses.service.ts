@@ -46,7 +46,7 @@ export class CoursesService {
 
     if (!newCourse) {
       Logger.error('Final form of the course is null');
-      throw LastFormOfTheCourseFailed();
+      throw new LastFormOfTheCourseFailed();
     }
 
     const stepsIds: number[] = [];
@@ -109,7 +109,7 @@ export class CoursesService {
     });
 
     if (!courseDetails) {
-      throw CourseNotFoundException();
+      throw new CourseNotFoundException();
     }
 
     return getFullCourse(courseDetails, this.stepService, this.resourceService);
@@ -121,7 +121,7 @@ export class CoursesService {
     });
 
     if (!existingCourse) {
-      throw CourseNotFoundException();
+      throw new CourseNotFoundException();
     }
 
     existingCourse.lastAccessed = new Date().toString();
@@ -142,7 +142,7 @@ export class CoursesService {
     });
 
     if (!existingCourse) {
-      throw CourseNotFoundException();
+      throw new CourseNotFoundException();
     }
 
     existingCourse.completedSteps =

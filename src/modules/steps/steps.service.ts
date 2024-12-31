@@ -42,7 +42,7 @@ export class StepsService {
     let existingStep = await this.stepRepository.findOneBy({ id });
 
     if (!existingStep) {
-      throw StepNotFoundException();
+      throw new StepNotFoundException();
     }
 
     existingStep.completed = !existingStep.completed;

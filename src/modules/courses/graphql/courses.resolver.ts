@@ -23,7 +23,7 @@ export class CoursesResolver {
     const user = await this.userService.findOne(req.user['email']);
 
     if (!user) {
-      throw UserNotFoundException();
+      throw new UserNotFoundException();
     }
 
     return this.coursesService.generateCourse(
@@ -38,7 +38,7 @@ export class CoursesResolver {
     const user = await this.userService.findOne(req.user['email']);
 
     if (!user) {
-      throw UserNotFoundException();
+      throw new UserNotFoundException();
     }
     return this.coursesService.getCourses({ userId: user.id });
   }
@@ -51,7 +51,7 @@ export class CoursesResolver {
     const user = await this.userService.findOne(req.user['email']);
 
     if (!user) {
-      throw UserNotFoundException();
+      throw new UserNotFoundException();
     }
 
     return this.coursesService.getCourseById({

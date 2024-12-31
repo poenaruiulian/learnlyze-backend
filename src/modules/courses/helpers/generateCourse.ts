@@ -26,7 +26,7 @@ export const generateCourse = async (
 
   if (!firstFormGeneratedCourse) {
     Logger.error('First form failed to generate.');
-    throw FirstFormOfTheCourseFailed();
+    throw new FirstFormOfTheCourseFailed();
   }
 
   Logger.log('First form generated with success.');
@@ -42,7 +42,7 @@ export const generateCourse = async (
 
   if (!secondFormGeneratedCourse) {
     Logger.error('Second form failed to generate.');
-    throw SecondFormOfTheCourseFailed();
+    throw new SecondFormOfTheCourseFailed();
   }
 
   Logger.log('Second form generated with success.');
@@ -57,7 +57,7 @@ export const generateCourse = async (
 
   if (!thirdFormGeneratedCourse) {
     Logger.error('Third form failed to generate.');
-    throw LastFormOfTheCourseFailed();
+    throw new LastFormOfTheCourseFailed();
   }
 
   Logger.log('Third form generated with success.');
