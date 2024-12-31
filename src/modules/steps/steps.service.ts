@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateStepDto } from './dto';
 import { CoursesService } from '../courses';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { StepNotFoundException } from '../../common';
 
 @Injectable()
 export class StepsService {
@@ -41,8 +42,7 @@ export class StepsService {
     let existingStep = await this.stepRepository.findOneBy({ id });
 
     if (!existingStep) {
-      // TODO Handle error
-      return null;
+      throw StepNotFoundException();
     }
 
     existingStep.completed = !existingStep.completed;

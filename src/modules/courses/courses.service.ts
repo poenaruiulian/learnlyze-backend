@@ -10,7 +10,11 @@ import {
 } from './helpers';
 import { ResourceService } from '../resources';
 import { CreateStepDto, StepsService } from '../steps';
-import { Logger } from '../../common';
+import {
+  CourseNotFoundException,
+  LastFormOfTheCourseFailed,
+  Logger,
+} from '../../common';
 import * as process from 'process';
 import { courseExample } from './constants';
 import moment from 'moment';
@@ -42,8 +46,7 @@ export class CoursesService {
 
     if (!newCourse) {
       Logger.error('Final form of the course is null');
-      // TODO: Throw error on front end
-      return null;
+      throw LastFormOfTheCourseFailed();
     }
 
     const stepsIds: number[] = [];
@@ -106,8 +109,7 @@ export class CoursesService {
     });
 
     if (!courseDetails) {
-      // TODO Handle error
-      return;
+      throw CourseNotFoundException();
     }
 
     return getFullCourse(courseDetails, this.stepService, this.resourceService);
@@ -119,8 +121,7 @@ export class CoursesService {
     });
 
     if (!existingCourse) {
-      // TODO Handle error
-      return null;
+      throw CourseNotFoundException();
     }
 
     existingCourse.lastAccessed = new Date().toString();
@@ -141,8 +142,7 @@ export class CoursesService {
     });
 
     if (!existingCourse) {
-      // TODO Handle error
-      return null;
+      throw CourseNotFoundException();
     }
 
     existingCourse.completedSteps =

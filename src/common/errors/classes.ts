@@ -40,6 +40,62 @@ export class EmailAlreadyInUse extends HttpException {
   }
 }
 
+export class FirstFormOfTheCourseFailed extends HttpException {
+  constructor() {
+    super({
+      message: ErrorMessages.somethingWentWrong,
+      description: ErrorDescriptions.firstFormOfTheCourseFailed,
+      code: ErrorCodes.courseGenerationFailed,
+    });
+  }
+}
+
+export class SecondFormOfTheCourseFailed extends HttpException {
+  constructor() {
+    super({
+      message: ErrorMessages.somethingWentWrong,
+      description: ErrorDescriptions.secondFormOfTheCourseFailed,
+      code: ErrorCodes.courseGenerationFailed,
+    });
+  }
+}
+
+export class LastFormOfTheCourseFailed extends HttpException {
+  constructor() {
+    super({
+      message: ErrorMessages.somethingWentWrong,
+      description: ErrorDescriptions.lastFormOfTheCourseFailed,
+      code: ErrorCodes.courseGenerationFailed,
+    });
+  }
+}
+
+export class CourseNotFoundException extends HttpException {
+  constructor() {
+    super(
+      {
+        message: ErrorMessages.courseNotFound,
+        description: ErrorDescriptions.somethingWentWrong,
+        code: ErrorCodes.courseNotFound,
+      },
+      HttpStatus.NOT_FOUND,
+    );
+  }
+}
+
+export class StepNotFoundException extends HttpException {
+  constructor() {
+    super(
+      {
+        message: ErrorMessages.stepNotFound,
+        description: ErrorDescriptions.somethingWentWrong,
+        code: ErrorCodes.stepNotFound,
+      },
+      HttpStatus.NOT_FOUND,
+    );
+  }
+}
+
 export class DefaultError extends HttpException {
   constructor(code: ErrorCodes) {
     super(

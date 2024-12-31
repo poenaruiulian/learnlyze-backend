@@ -4,7 +4,12 @@ import {
   getSecondFormGeneratedCourse,
 } from './courseGeneration';
 import { ResourceService } from '../../resources';
-import { Logger } from '../../../common';
+import {
+  FirstFormOfTheCourseFailed,
+  LastFormOfTheCourseFailed,
+  Logger,
+  SecondFormOfTheCourseFailed,
+} from '../../../common';
 
 export const generateCourse = async (
   description: string,
@@ -21,7 +26,7 @@ export const generateCourse = async (
 
   if (!firstFormGeneratedCourse) {
     Logger.error('First form failed to generate.');
-    return null;
+    throw FirstFormOfTheCourseFailed();
   }
 
   Logger.log('First form generated with success.');
@@ -37,7 +42,7 @@ export const generateCourse = async (
 
   if (!secondFormGeneratedCourse) {
     Logger.error('Second form failed to generate.');
-    return null;
+    throw SecondFormOfTheCourseFailed();
   }
 
   Logger.log('Second form generated with success.');
@@ -52,7 +57,7 @@ export const generateCourse = async (
 
   if (!thirdFormGeneratedCourse) {
     Logger.error('Third form failed to generate.');
-    return null;
+    throw LastFormOfTheCourseFailed();
   }
 
   Logger.log('Third form generated with success.');
