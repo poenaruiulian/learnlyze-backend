@@ -1,0 +1,3 @@
+type Mutation {
+    replaceResource(stepId: Int, resourceId: Int, feedback: String): Resource
+}
