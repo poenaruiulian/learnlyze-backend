@@ -1,6 +1,6 @@
 import { SecondFormGeneratedCourse } from '../../interfaces';
 import { ThirdFormGeneratedCourse } from '../../interfaces/ThirdFormGeneratedCourse';
-import { handleOpenAIRequests } from '../handleOpenAIRequests';
+import { handleOpenAIRequests } from '../../../../common';
 
 export const getThirdFormGeneratedCourse = async (
   secondFormGeneratedCourse: SecondFormGeneratedCourse,

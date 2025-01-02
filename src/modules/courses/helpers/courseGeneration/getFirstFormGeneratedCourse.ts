@@ -1,6 +1,5 @@
 import { FirstFormGeneratedCourse } from '../../interfaces';
-import { handleOpenAIRequests } from '../handleOpenAIRequests';
-import { Logger } from '../../../../common';
+import { Logger, handleOpenAIRequests } from '../../../../common';
 
 export const getFirstFormGeneratedCourse = async (
   description: string,
