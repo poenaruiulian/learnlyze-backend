@@ -20,6 +20,7 @@ export class StepsService {
     @InjectRepository(Step)
     private stepRepository: Repository<Step>,
     private eventEmitter: EventEmitter2,
+    @Inject(forwardRef(() => ResourceService))
     private resourceService: ResourceService,
   ) {}
 
@@ -43,6 +44,10 @@ export class StepsService {
 
   async findByParentId(parentStep: number) {
     return this.stepRepository.findBy({ parentStep });
+  }
+
+  async save(step: Step) {
+    return this.stepRepository.save(step);
   }
 
   async changeStepState({ stepId: id }: { stepId: number }) {

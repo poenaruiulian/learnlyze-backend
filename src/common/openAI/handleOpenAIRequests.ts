@@ -137,6 +137,37 @@ const generateSubSteps = ({
     The above is an example of how the data must be structured. 
 `;
 
+const recommendSearchPhrase = ({
+  resourceTitle,
+  resourceDescription,
+  stepDescription,
+  feedback,
+}: {
+  resourceTitle: string;
+  resourceDescription: string;
+  stepDescription: string;
+  feedback: string;
+}) => `
+  Project: 
+    Develop a learning application where the users can create courses based on a short description. They will have the possibility to modify those courses later.
+  
+  Role: 
+    ChatGPT role is to analyze the feedback on why a resource was not good enough and based on the feedback and step description to give a good phrase that be used to search on Youtube for another resource.
+  
+  Context:
+    You will receive a title of resource that can or can't be useful, the description of the step the resource was recommended and the user feedback.
+    If the feedback is useful and coherent use it to recommend a phrase that can be latter used to replace the resource with another.
+    Use the step description and feedback to suggest a good phrase. The title and resource description are given so you can understand what could be wrong with the resource.
+    Also use the description and title of the resource so you can recommend a search phrase that could give something similar similar but better.
+    The title of the resource is ${resourceTitle} and the description of the resource is ${resourceDescription}, the description of the step is ${stepDescription} and the feedback of the user is ${feedback}
+    
+   Output specification: 
+    The output should be fairly short sentence.
+   
+   Output example:
+    "A phrase to search with" or "How to search something?" or "Learning something" 
+  `;
+
 export const handleOpenAIRequests = async ({
   type,
   description,
@@ -145,7 +176,8 @@ export const handleOpenAIRequests = async ({
     | 'firstFormGeneratedCoursePrompt'
     | 'secondFormGeneratedCoursePrompt'
     | 'generateDescriptionTitleBased'
-    | 'generateSubSteps';
+    | 'generateSubSteps'
+    | 'recommendSearchPhrase';
   description: any;
 }) => {
   const configService = new ConfigService();
@@ -161,6 +193,9 @@ export const handleOpenAIRequests = async ({
       break;
     case 'generateSubSteps':
       prompt = generateSubSteps(description);
+      break;
+    case 'recommendSearchPhrase':
+      prompt = recommendSearchPhrase(description);
       break;
     default:
       prompt = generateDescriptionTitleBasedPrompt(description);

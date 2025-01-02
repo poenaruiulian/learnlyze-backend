@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Resource } from './entities';
@@ -6,6 +6,9 @@ import { CreateResourceDto } from './dto/CreateResourceDto';
 import { InjectCore, PuppeteerCore } from 'nestjs-pptr';
 import { Page } from 'puppeteer';
 import { fillDataFromPage, scrollPage } from './helpers';
+import { StepsService } from '../steps';
+import { handleOpenAIRequests, Logger } from '../../common';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ResourceService {
@@ -13,6 +16,7 @@ export class ResourceService {
     @InjectRepository(Resource)
     private resourceRepository: Repository<Resource>,
     @InjectCore() private readonly puppeteer: PuppeteerCore,
+    @Inject(forwardRef(() => StepsService)) private stepService: StepsService,
   ) {}
 
   async searchByKeywords(keywords: string[]): Promise<Resource[]> {
@@ -153,5 +157,100 @@ export class ResourceService {
 
   async findOneById(id: number) {
     return await this.resourceRepository.findOneBy({ id });
+  }
+
+  async replaceResource({
+    stepId,
+    resourceId,
+    feedback,
+  }: {
+    stepId: number;
+    resourceId: number;
+    feedback: string;
+  }) {
+    const foundResource = await this.findOneById(resourceId);
+    const foundStep = await this.stepService.findOneById(stepId);
+
+    if (!foundStep || !foundResource) {
+      // TODO Handle error
+      return null;
+    }
+
+    const newSearchPhrase = await handleOpenAIRequests({
+      description: {
+        feedback,
+        resourceTitle: foundResource.title,
+        resourceDescription: foundResource.description,
+        stepDescription: foundStep.description,
+      },
+      type: 'recommendSearchPhrase',
+    });
+
+    if (!newSearchPhrase) {
+      // TODO Handle error
+      return null;
+    }
+
+    const configService = new ConfigService();
+
+    const apiKey = configService.get<string>('YOUTUBE_API_KEY') ?? '';
+    const youtubeMainUrl = (keywords: string) =>
+      `https://youtube.googleapis.com/youtube/v3/search?key=${apiKey}&part=snippet&q=${keywords}&relevanceLanguage=en&type=video`;
+
+    // We first try to use the YouTube API to fetch the resources
+    const response = await fetch(youtubeMainUrl(newSearchPhrase));
+
+    let resource: {
+      title: string;
+      description: string;
+      external: string;
+    } | null = null;
+
+    if (response.ok) {
+      // If the response returns data
+      const data = await response.json();
+
+      resource = data.items.map((item: any) => ({
+        title: item.snippet.title,
+        description: item.snippet.description,
+        external: item.id.videoId,
+      }))[0];
+    } else {
+      // In case of failure we still want to give the user resources so we scrappe for them using Puppeteer
+      let resources = await this.scrappeForResources(newSearchPhrase).catch(
+        (error) => {
+          Logger.error(error);
+          return [];
+        },
+      );
+
+      if (resources.length === 0) {
+        // If we fail again to retrieve data for the user we will try and get data from our database, searching through the saved resources
+        Logger.error('The scrapper failed or it did not return anything.');
+        resources = await this.searchByKeywords(newSearchPhrase.split(''));
+      } else {
+        Logger.log('The scrapper succeeded.');
+      }
+
+      resource = resources[0];
+    }
+
+    if (!resource) {
+      // TODO Handle error
+      return null;
+    }
+
+    const newResource = await this.create(resource);
+
+    foundStep.resources = foundStep.resources.map((resId) =>
+      resId === resourceId ? newResource.id : resId,
+    );
+
+    await this.stepService.save(foundStep);
+
+    console.log('newSearchPhrase', newSearchPhrase);
+    console.log(foundResource, newResource);
+
+    return newResource;
   }
 }

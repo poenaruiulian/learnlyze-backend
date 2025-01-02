@@ -12,7 +12,6 @@ import { User, UsersService } from '../users';
   imports: [
     TypeOrmModule.forFeature([Course, Step, Resource, User]),
     PuppeteerModule.forRoot({ launchOptions: { headless: true } }),
-    forwardRef(() => StepsModule),
   ],
   controllers: [],
   providers: [
