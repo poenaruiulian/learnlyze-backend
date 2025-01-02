@@ -38,4 +38,12 @@ export class Step {
   @Field()
   @Column()
   completed: boolean;
+
+  @Field()
+  @Column({ nullable: true })
+  generation: number;
+
+  @Field()
+  @Column({ default: false })
+  hasChild: boolean;
 }

@@ -5,7 +5,7 @@ import { CreateResourceDto } from '../../../resources/dto/CreateResourceDto';
 import { Logger } from '../../../../common';
 
 export const generateSecondFormSteps = async (
-  firstFormGeneratedCourse: FirstFormGeneratedCourse,
+  firstFormGeneratedCourseSteps: FirstFormGeneratedCourse['steps'],
   resourceService: ResourceService,
 ) => {
   const configService = new ConfigService();
@@ -14,14 +14,14 @@ export const generateSecondFormSteps = async (
   const youtubeMainUrl = (keywords: string) =>
     `https://youtube.googleapis.com/youtube/v3/search?key=${apiKey}&part=snippet&q=${keywords}&relevanceLanguage=en&type=video`;
 
-  if (!firstFormGeneratedCourse.steps) {
+  if (!firstFormGeneratedCourseSteps) {
     Logger.error('No steps found from the first step');
     return null;
   }
 
   return await Promise.all(
     // For each step from the course we want to generate resources
-    firstFormGeneratedCourse.steps.map(async (step) => {
+    firstFormGeneratedCourseSteps.map(async (step) => {
       // We first try to use the YouTube API to fetch the resources
       const response = await fetch(youtubeMainUrl(step.keywords.join(' ')));
 

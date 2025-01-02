@@ -70,6 +70,7 @@ export class CoursesService {
         priority,
         parentStep: null,
         resources: resourcesIds,
+        generation: 0,
       };
 
       const savedStep = await stepService.create(createStepDto);

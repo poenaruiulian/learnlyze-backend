@@ -2,4 +2,7 @@ type Mutation {
     changeStepState(courseId: Int!, stepId: Int!): Step
 }
 
+type Mutation {
+    breakStep(stepId: Int!, feedback: String!): [Step]
+}
 

@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
-import { Logger } from '../../../common';
+import { Logger } from '../index';
 
 const firstFormGeneratedCoursePrompt = (description: string) => `
   Project: 
@@ -99,6 +99,44 @@ const generateDescriptionTitleBasedPrompt = (description: string) => `
   Note: Each item in the list should correspond directly to a title in the provided list, and each HTML string should be a standalone description that can be displayed independently in the application.
 `;
 
+const generateSubSteps = ({
+  title,
+  description,
+  feedback,
+}: {
+  title: string;
+  description: string;
+  feedback: string;
+}) => `
+  Project: 
+    Develop a learning application where the users can create courses based on a short description. They will have the possibility to modify those courses later.
+  
+  Role: 
+    ChatGPT role is to understand the given step and why it could be difficult to a user to understand and learn. After that you need to think from a teacher perspective.
+    
+  Context: 
+    You will receive a title and a description of a step the user did not understand. The user might gave a feedback for which why he did not understood, but if the feedback is not specific you should consider the step too complicated for the user to understand. 
+    In any case you should analyze the title and description of step and create only one set of substeps to better understand the notions in the provided step.
+    If there is specific feedback analyze it and create the set of substeps based on that description so the user understands better the notions provided in the first place.
+    Each step provided for a course should contain:
+      1. Title - a descriptive title for the step based on the representation of what a user will learn on this step
+      2. Keywords - these keywords are special words or sentences that the user can use to search on Youtube for good quality explanations regarding the step provided
+    The title of the step you need to create a set of substeps is ${title} and the description is ${description}. The user offered as feedback: ${feedback}. Take these into consideration when generating the substeps and feedback too if it is specific.
+   
+  Output specifications: 
+    The answer will be later processed and used to generate more data and store to a database. 
+    The answer need to be in a JSON format that can be later converted to an object. 
+    Don't add any other unnecessary comments to the answer, just the JSON stringyfied object that should look like in the example below.
+    Don't add at the start of the answer '\`\`\`json\\n' and don't add at the end \\n. Just give the simple stringyfied JSON object as described below. 
+    Your response will later be used as JSON.parse(response) so don't generate a response that could cause any of the below errors:
+         ERROR [ExceptionsHandler] Expected ',' or ']' after array element in JSON at position...
+         SyntaxError: Unexpected token '\`', \\"\`\`\`json
+  
+  Output example: I will give you an example regarding how the answer should look. The answer should be just a stringyfied JSON object from a JSON object looking like so:
+    [{"number": 1,"title": "Variables and how to initialize them","keywords": ["C/C++ variables", "C/C++ data types"],},{"number": 2,"title": "Operators in C/C++","keywords": ["C/C++ operators", "arithmetic operators", "logical operators"]}]
+    The above is an example of how the data must be structured. 
+`;
+
 export const handleOpenAIRequests = async ({
   type,
   description,
@@ -106,7 +144,8 @@ export const handleOpenAIRequests = async ({
   type:
     | 'firstFormGeneratedCoursePrompt'
     | 'secondFormGeneratedCoursePrompt'
-    | 'generateDescriptionTitleBased';
+    | 'generateDescriptionTitleBased'
+    | 'generateSubSteps';
   description: any;
 }) => {
   const configService = new ConfigService();
@@ -119,6 +158,9 @@ export const handleOpenAIRequests = async ({
       break;
     case 'secondFormGeneratedCoursePrompt':
       prompt = secondFormGeneratedCoursePrompt(description);
+      break;
+    case 'generateSubSteps':
+      prompt = generateSubSteps(description);
       break;
     default:
       prompt = generateDescriptionTitleBasedPrompt(description);

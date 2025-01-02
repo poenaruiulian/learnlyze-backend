@@ -4,8 +4,7 @@ import {
 } from '../../interfaces';
 import { ResourceService } from '../../../resources';
 import { generateSecondFormSteps } from './generateSecondFormSteps';
-import { handleOpenAIRequests } from '../handleOpenAIRequests';
-import { Logger } from '../../../../common';
+import { Logger, handleOpenAIRequests } from '../../../../common';
 
 export const getSecondFormGeneratedCourse = async (
   firstFormGeneratedCourse: FirstFormGeneratedCourse,
@@ -13,7 +12,7 @@ export const getSecondFormGeneratedCourse = async (
 ) => {
   // We generate the steps that includes resources
   let secondFormGeneratedCourseSteps = await generateSecondFormSteps(
-    firstFormGeneratedCourse,
+    firstFormGeneratedCourse.steps,
     resourceService,
   );
 

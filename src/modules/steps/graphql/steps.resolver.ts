@@ -10,9 +10,17 @@ export class StepsResolver {
   @Mutation()
   async changeStepState(
     @RequestGraphql() req: any,
-    @Args({ name: 'courseId', type: () => Number }) courseId: number,
     @Args({ name: 'stepId', type: () => Number }) stepId: number,
   ) {
-    return this.stepsService.changeStepState({ courseId, stepId });
+    return this.stepsService.changeStepState({ stepId });
+  }
+
+  @Mutation()
+  async breakStep(
+    @RequestGraphql() req: any,
+    @Args({ name: 'stepId', type: () => Number }) stepId: number,
+    @Args({ name: 'feedback', type: () => String }) feedback: string,
+  ) {
+    return this.stepsService.breakStep({ stepId, feedback });
   }
 }
