@@ -84,6 +84,12 @@ export class StepsService {
       return null;
     }
 
+    if (foundStep.hasChild) {
+      // TODO Handle generation error
+      Logger.warning('This child already has a set of subsets.');
+      return null;
+    }
+
     const generatedSubSteps = await generateSubSteps({
       title: foundStep.title,
       description: foundStep.description,
@@ -108,12 +114,14 @@ export class StepsService {
     let insertedSteps: Step[] = [];
 
     for (const step of secondForGeneratedSteps) {
-      const description = await handleOpenAIRequests({
+      let descriptions = await handleOpenAIRequests({
         description: step.title,
         type: 'generateDescriptionTitleBased',
       });
 
-      if (!description) {
+      descriptions = descriptions ? JSON.parse(descriptions) : descriptions;
+
+      if (!descriptions) {
         // TODO Handle error
         return null;
       }
@@ -131,7 +139,7 @@ export class StepsService {
 
       await this.create({
         parentStep: id,
-        description,
+        description: descriptions[0],
         priority: step.number,
         title: step.title,
         resources: resourcesIds,

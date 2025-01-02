@@ -5,6 +5,8 @@ type Step {
     title: String!
     description: String!
     completed: Boolean!
+    generation: Int
+    hasChild: Boolean!
 }
 
 type FullStep {
