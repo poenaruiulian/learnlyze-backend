@@ -4,4 +4,5 @@ export type CreateStepDto = {
   priority: number;
   title: string;
   description: string;
+  generation: number;
 };

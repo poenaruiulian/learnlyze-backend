@@ -5,7 +5,11 @@ import { Repository } from 'typeorm';
 import { CreateStepDto } from './dto';
 import { CoursesService } from '../courses';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { handleOpenAIRequests, StepNotFoundException } from '../../common';
+import {
+  handleOpenAIRequests,
+  Logger,
+  StepNotFoundException,
+} from '../../common';
 import { generateSubSteps } from './helpers';
 import { generateSecondFormSteps } from '../courses/helpers/courseGeneration';
 import { ResourceService } from '../resources';
@@ -28,12 +32,17 @@ export class StepsService {
     step.title = createStepDto.title;
     step.description = createStepDto.description;
     step.completed = false;
+    step.generation = createStepDto.generation;
 
     return await this.stepRepository.save(step);
   }
 
   async findOneById(id: number) {
     return this.stepRepository.findOne({ where: { id } });
+  }
+
+  async findByParentId(parentStep: number) {
+    return this.stepRepository.findBy({ parentStep });
   }
 
   async changeStepState({ stepId: id }: { stepId: number }) {
@@ -62,6 +71,12 @@ export class StepsService {
 
     if (!foundStep) {
       throw new StepNotFoundException();
+    }
+
+    if (foundStep.generation === 2) {
+      // TODO Handle generation error
+      Logger.warning('The nesting of substeps is too deep.');
+      return null;
     }
 
     const generatedSubSteps = await generateSubSteps({
@@ -115,8 +130,12 @@ export class StepsService {
         priority: step.number,
         title: step.title,
         resources: resourcesIds,
+        generation: foundStep.generation + 1,
       }).then((insertedStep) => insertedSteps.push(insertedStep));
     }
+
+    foundStep.hasChild = true;
+    await this.stepRepository.save(foundStep);
 
     return insertedSteps;
   }

@@ -1,6 +1,34 @@
 import { Course } from '../entities';
-import { StepsService } from '../../steps';
-import { ResourceService } from '../../resources';
+import { Step, StepsService } from '../../steps';
+import { Resource, ResourceService } from '../../resources';
+
+const getFullStep = async ({
+  resourceService,
+  step,
+  stepService,
+}: {
+  resourceService: ResourceService;
+  step: Step;
+  stepService: StepsService;
+}): Promise<any> => {
+  const subSteps = await Promise.all(
+    (await stepService.findByParentId(step.id)).map(async (subStep) =>
+      getFullStep({ step: subStep, stepService, resourceService }),
+    ),
+  );
+
+  const resources = await Promise.all(
+    step.resources.map(
+      async (resourceId) => await resourceService.findOneById(resourceId),
+    ),
+  );
+
+  return {
+    details: step,
+    resources,
+    subSteps,
+  };
+};
 
 export const getFullCourse = async (
   course: Course,
@@ -21,16 +49,7 @@ export const getFullCourse = async (
         completedSteps = completedSteps + 1;
       }
 
-      const resources = await Promise.all(
-        stepDetails.resources.map(
-          async (resourceId) => await resourceService.findOneById(resourceId),
-        ),
-      );
-
-      return {
-        details: stepDetails,
-        resources,
-      };
+      return getFullStep({ step: stepDetails, stepService, resourceService });
     }),
   );
 

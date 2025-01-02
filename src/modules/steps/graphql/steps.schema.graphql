@@ -10,5 +10,6 @@ type Step {
 type FullStep {
     details: Step!
     resources: [Resource]
+    subSteps: [FullStep]
 }
 
