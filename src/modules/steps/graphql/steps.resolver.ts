@@ -11,8 +11,9 @@ export class StepsResolver {
   async changeStepState(
     @RequestGraphql() req: any,
     @Args({ name: 'stepId', type: () => Number }) stepId: number,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    return this.stepsService.changeStepState({ stepId });
+    return this.stepsService.changeStepState({ stepId, courseId });
   }
 
   @Mutation()

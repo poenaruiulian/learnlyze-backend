@@ -4,7 +4,6 @@ import { Step } from './entities';
 import { Repository } from 'typeorm';
 import { CreateStepDto } from './dto';
 import { CoursesService } from '../courses';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   handleOpenAIRequests,
   Logger,
@@ -19,9 +18,10 @@ export class StepsService {
   constructor(
     @InjectRepository(Step)
     private stepRepository: Repository<Step>,
-    private eventEmitter: EventEmitter2,
     @Inject(forwardRef(() => ResourceService))
     private resourceService: ResourceService,
+    @Inject(forwardRef(() => CoursesService))
+    private courseService: CoursesService,
   ) {}
 
   async create(createStepDto: CreateStepDto) {
@@ -50,7 +50,13 @@ export class StepsService {
     return this.stepRepository.save(step);
   }
 
-  async changeStepState({ stepId: id }: { stepId: number }) {
+  async changeStepState({
+    stepId: id,
+    courseId,
+  }: {
+    stepId: number;
+    courseId: number;
+  }) {
     let existingStep = await this.stepRepository.findOneBy({ id });
 
     if (!existingStep) {
@@ -60,7 +66,10 @@ export class StepsService {
     existingStep.completed = !existingStep.completed;
 
     return this.stepRepository.save(existingStep).then(async (updatedStep) => {
-      this.eventEmitter.emit('step.changed', updatedStep);
+      await this.courseService.changeCompletedSteps({
+        courseId,
+        completed: updatedStep.completed,
+      });
       return updatedStep;
     });
   }

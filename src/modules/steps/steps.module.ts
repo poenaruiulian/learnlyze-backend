@@ -6,6 +6,7 @@ import { StepsResolver } from './graphql';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Resource, ResourceService, ResourcesModule } from '../resources';
 import { PuppeteerModule } from 'nestjs-pptr';
+import { CoursesModule } from '../courses';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { PuppeteerModule } from 'nestjs-pptr';
     EventEmitterModule.forRoot(),
     PuppeteerModule.forRoot({ launchOptions: { headless: true } }),
     forwardRef(() => ResourcesModule),
+    forwardRef(() => CoursesModule),
   ],
   controllers: [],
   providers: [StepsService, StepsResolver],

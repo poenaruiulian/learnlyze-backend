@@ -17,21 +17,19 @@ import {
 } from '../../common';
 import * as process from 'process';
 import { courseExample } from './constants';
-import moment from 'moment';
-import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class CoursesService {
   constructor(
     @InjectRepository(Course) private courseRepository: Repository<Course>,
     private resourceService: ResourceService,
+    @Inject(forwardRef(() => StepsService))
     private stepService: StepsService,
   ) {}
 
   async generateCourse(
     courseGenerationDto: CourseGenerationDto,
     resourceService: ResourceService,
-    stepService: StepsService,
   ) {
     const args = process.argv.slice(2);
     const shouldReturnTestCourse = args.includes('test-course');
@@ -73,7 +71,7 @@ export class CoursesService {
         generation: 0,
       };
 
-      const savedStep = await stepService.create(createStepDto);
+      const savedStep = await this.stepService.create(createStepDto);
       if (savedStep) {
         stepsIds.push(savedStep.id);
       }
@@ -95,7 +93,7 @@ export class CoursesService {
     return await this.courseRepository
       .save(course)
       .then((response) =>
-        formatCourseForGraphQL(response, stepService, resourceService),
+        formatCourseForGraphQL(response, this.stepService, resourceService),
       )
       .catch((error) => Logger.error(error));
   }
@@ -130,7 +128,6 @@ export class CoursesService {
     return this.courseRepository.save(existingCourse);
   }
 
-  @OnEvent('step.changed')
   async changeCompletedSteps({
     courseId,
     completed,
