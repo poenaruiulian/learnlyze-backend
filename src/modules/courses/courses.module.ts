@@ -10,17 +10,12 @@ import { User, UsersService } from '../users';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Course, Step, Resource, User]),
+    TypeOrmModule.forFeature([Course, Resource, User]),
     PuppeteerModule.forRoot({ launchOptions: { headless: true } }),
+    forwardRef(() => StepsModule),
   ],
   controllers: [],
-  providers: [
-    CoursesService,
-    CoursesResolver,
-    ResourceService,
-    StepsService,
-    UsersService,
-  ],
+  providers: [CoursesService, CoursesResolver, ResourceService, UsersService],
   exports: [CoursesService],
 })
 export class CoursesModule {}

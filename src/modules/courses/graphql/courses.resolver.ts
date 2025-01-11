@@ -11,7 +11,6 @@ export class CoursesResolver {
   constructor(
     private coursesService: CoursesService,
     private resourceService: ResourceService,
-    private stepService: StepsService,
     private userService: UsersService,
   ) {}
 
@@ -29,7 +28,6 @@ export class CoursesResolver {
     return this.coursesService.generateCourse(
       { userId: user.id, description },
       this.resourceService,
-      this.stepService,
     );
   }
 

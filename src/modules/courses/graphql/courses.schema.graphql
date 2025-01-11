@@ -8,6 +8,7 @@ type Course {
     lastAccessed: String!
     postedDate: String
     completedSteps: Int!
+    steps: [Int]
 }
 
 type FullCourse {
