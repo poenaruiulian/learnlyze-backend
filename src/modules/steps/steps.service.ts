@@ -50,6 +50,45 @@ export class StepsService {
     return this.stepRepository.save(step);
   }
 
+  async changeStateSubSteps(subSteps: Step[], parentStep: Step) {
+    for (let subStep of subSteps) {
+      const subStepsOfSubStep = await this.stepRepository.findBy({
+        parentStep: subStep.id,
+      });
+
+      subStep.completed = parentStep.completed;
+
+      await this.stepRepository.save(subStep);
+
+      await this.changeStateSubSteps(subStepsOfSubStep, subStep);
+    }
+  }
+
+  async changeStateOfParent(step: Step, courseId: number) {
+    const subSteps = await this.stepRepository.findBy({
+      parentStep: step.parentStep,
+    });
+
+    const areSubStepsCompleted = subSteps
+      .map((step) => step.completed)
+      .reduce((previousValue, currentValue) => previousValue && currentValue);
+
+    let parentStep = await this.stepRepository.findOneBy({
+      id: step.parentStep,
+    });
+
+    if (parentStep) {
+      parentStep.completed = areSubStepsCompleted;
+
+      await this.save(parentStep).then(async (updatedStep) => {
+        await this.courseService.changeCompletedSteps({
+          courseId,
+          completed: areSubStepsCompleted,
+        });
+      });
+    }
+  }
+
   async changeStepState({
     stepId: id,
     courseId,
@@ -63,15 +102,26 @@ export class StepsService {
       throw new StepNotFoundException();
     }
 
+    const subSteps = await this.stepRepository.findBy({ parentStep: id });
+
     existingStep.completed = !existingStep.completed;
 
-    return this.stepRepository.save(existingStep).then(async (updatedStep) => {
+    const updatedStep = await this.stepRepository.save(existingStep);
+
+    await this.changeStateSubSteps(subSteps, existingStep);
+
+    if (updatedStep.parentStep) {
+      await this.changeStateOfParent(updatedStep, courseId);
+    }
+
+    if (!updatedStep.parentStep) {
       await this.courseService.changeCompletedSteps({
         courseId,
         completed: updatedStep.completed,
       });
-      return updatedStep;
-    });
+    }
+
+    return updatedStep;
   }
 
   async breakStep({
@@ -131,8 +181,17 @@ export class StepsService {
       descriptions = descriptions ? JSON.parse(descriptions) : descriptions;
 
       if (!descriptions) {
-        // TODO Handle error
-        return null;
+        descriptions = await handleOpenAIRequests({
+          description: step.title,
+          type: 'generateDescriptionTitleBased',
+        });
+
+        descriptions = descriptions ? JSON.parse(descriptions) : descriptions;
+
+        if (!descriptions) {
+          // TODO Handle error
+          return null;
+        }
       }
 
       const resourcesIds: number[] = [];
@@ -141,7 +200,11 @@ export class StepsService {
         const response = await this.resourceService.findOneByExternal(
           resource.external,
         );
-        if (response) {
+        if (
+          response &&
+          !resourcesIds.includes(response.id) &&
+          resourcesIds.length <= 5
+        ) {
           resourcesIds.push(response.id);
         }
       }
