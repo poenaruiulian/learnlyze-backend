@@ -77,7 +77,7 @@ export class StepsService {
       id: step.parentStep,
     });
 
-    if (parentStep) {
+    if (parentStep && parentStep.completed !== areSubStepsCompleted) {
       parentStep.completed = areSubStepsCompleted;
 
       await this.save(parentStep).then(async (updatedStep) => {
