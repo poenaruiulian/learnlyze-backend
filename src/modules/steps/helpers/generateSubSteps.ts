@@ -1,4 +1,4 @@
-import { FirstFormGeneratedCourse } from '../../courses/interfaces';
+import { FirstFormGeneratedCourse } from '../../courses';
 import { handleOpenAIRequests } from '../../../common';
 
 export const generateSubSteps = async ({
