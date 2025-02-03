@@ -83,11 +83,8 @@ export class CoursesService {
     course.user = courseGenerationDto.userId;
     course.title = title;
     course.steps = stepsIds;
-    course.tag = undefined;
-    course.description = undefined;
     course.startedAt = new Date().toString();
     course.lastAccessed = new Date().toString();
-    course.postedDate = undefined;
     course.completedSteps = 0;
 
     return await this.courseRepository
@@ -145,6 +142,74 @@ export class CoursesService {
 
     existingCourse.completedSteps =
       existingCourse.completedSteps + (completed ? 1 : -1);
+
+    return this.courseRepository.save(existingCourse);
+  }
+
+  async completeCourse({ courseId }: { courseId: number }) {
+    let existingCourse = await this.courseRepository.findOneBy({
+      id: courseId,
+    });
+
+    if (!existingCourse) {
+      throw new CourseNotFoundException();
+    }
+
+    existingCourse.completed = true;
+
+    return this.courseRepository.save(existingCourse);
+  }
+
+  async changePublishDetails(props: {
+    courseId: number;
+    title?: string;
+    description?: string;
+    tags?: string[];
+  }) {
+    let existingCourse = await this.courseRepository.findOneBy({
+      id: props.courseId,
+    });
+
+    if (!existingCourse) {
+      // TODO Handle errors
+      return null;
+    }
+
+    if (!existingCourse.completed) {
+      // TODO Handle errors
+      return null;
+    }
+
+    existingCourse = {
+      ...existingCourse,
+      title: props.title ?? existingCourse.title,
+      description: props.description ?? existingCourse.description,
+      tags: props.tags ?? existingCourse.tags,
+    };
+
+    return this.courseRepository.save(existingCourse);
+  }
+
+  async publishCourse({ courseId }: { courseId: number }) {
+    let existingCourse = await this.courseRepository.findOneBy({
+      id: courseId,
+    });
+
+    if (!existingCourse) {
+      // TODO Handle errors
+      return null;
+    }
+
+    if (
+      !existingCourse.completed ||
+      !existingCourse.tags ||
+      !existingCourse.description
+    ) {
+      // TODO Handle errors
+      return null;
+    }
+
+    existingCourse.postedDate = new Date().toString();
 
     return this.courseRepository.save(existingCourse);
   }

@@ -9,3 +9,15 @@ type Mutation {
 type Mutation {
     accessCourse(courseId: Int!): Course
 }
+
+type Mutation {
+    completeCourse(courseId: Int!): Course
+}
+
+type Mutation {
+    changePublishDetails(courseId: Int!, title: String, description: String, tags: [String]): Course
+}
+
+type Mutation {
+    publishCourse(courseId: Int!): Course
+}

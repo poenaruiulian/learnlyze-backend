@@ -3,12 +3,13 @@ type Course {
     user: Int!
     title: String!
     description: String
-    tag: String
+    tags: [String]
     startedAt: String!
     lastAccessed: String!
     postedDate: String
     completedSteps: Int!
     steps: [Int]
+    complete: Boolean!
 }
 
 type FullCourse {
