@@ -33,8 +33,8 @@ export class Course {
   description?: string;
 
   @Field()
-  @Column({ nullable: true })
-  tag?: string;
+  @Column('text', { nullable: true, array: true })
+  tags?: string[];
 
   @Field()
   @Column()
@@ -51,4 +51,8 @@ export class Course {
   @Field()
   @Column()
   completedSteps: number;
+
+  @Field()
+  @Column({ default: false })
+  completed: boolean;
 }

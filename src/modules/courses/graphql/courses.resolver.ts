@@ -66,4 +66,38 @@ export class CoursesResolver {
       courseId,
     });
   }
+
+  @Mutation()
+  async completeCourse(
+    @RequestGraphql() req: any,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
+  ) {
+    return this.coursesService.completeCourse({ courseId });
+  }
+
+  @Mutation()
+  async changePublishDetails(
+    @RequestGraphql() req: any,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
+    @Args({ name: 'title', type: () => String, nullable: true }) title?: string,
+    @Args({ name: 'description', type: () => String, nullable: true })
+    description?: string,
+    @Args({ name: 'tags', type: () => [String], nullable: true })
+    tags?: string[],
+  ) {
+    return this.coursesService.changePublishDetails({
+      courseId,
+      title,
+      description,
+      tags,
+    });
+  }
+
+  @Mutation()
+  async publishCourse(
+    @RequestGraphql() req: any,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
+  ) {
+    return this.coursesService.publishCourse({ courseId });
+  }
 }
