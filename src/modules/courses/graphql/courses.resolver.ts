@@ -14,25 +14,33 @@ export class CoursesResolver {
   ) {}
 
   @Mutation()
-  async generateCourse(
+  async generate(
     @RequestGraphql() req: any,
     @Args({ name: 'description', type: () => String }) description: string,
   ) {
-    const user = await this.userService.findOne(req.user['email']);
+    const user = await this.userService.findOneOrThrow(req.user['email']);
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
 
     return this.coursesService.generate({ userId: user.id, description });
   }
 
   @Query()
   @Query()
-  async getCourses(@RequestGraphql() req: any) {
-    const user = await this.userService.findOne(req.user['email']);
+  async getAll(@RequestGraphql() req: any) {
+    const user = await this.userService.findOneOrThrow(req.user['email']);
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
 
     return this.coursesService.getAll({ userId: user.id });
   }
 
   @Mutation()
-  async getCourseById(
+  async getFullById(
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
@@ -42,7 +50,7 @@ export class CoursesResolver {
   }
 
   @Mutation()
-  async accessCourse(
+  async access(
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
@@ -52,7 +60,7 @@ export class CoursesResolver {
   }
 
   @Mutation()
-  async completeCourse(
+  async complete(
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
@@ -62,26 +70,26 @@ export class CoursesResolver {
   @Mutation()
   async changePublishDetails(
     @RequestGraphql() req: any,
-    @Args({ name: 'courseId', type: () => Number }) courseId: number,
-    @Args({ name: 'title', type: () => String, nullable: true }) title?: string,
-    @Args({ name: 'description', type: () => String, nullable: true })
-    description?: string,
-    @Args({ name: 'tags', type: () => [String], nullable: true })
-    tags?: string[],
+    @Args('input') data: ChangePublishDetailsDto,
   ) {
-    return this.coursesService.changePublishDetails({
-      courseId,
-      title,
-      description,
-      tags,
-    });
+    return this.coursesService.changePublishDetails(data);
   }
 
   @Mutation()
-  async publishCourse(
+  async publish(
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
     return this.coursesService.publish({ courseId });
+  }
+
+  @Mutation()
+  async enroll(
+    @RequestGraphql() req: any,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
+  ) {
+    const user = await this.userService.findOneOrThrow(req.user['email']);
+
+    return this.coursesService.enroll({ userId: user.id, courseId });
   }
 }

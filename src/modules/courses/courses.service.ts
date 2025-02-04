@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { CourseGenerationDto, CourseOperationsDto } from './dto';
+import { CourseOperationsDto, CourseGenerationDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities';
@@ -170,12 +170,7 @@ export class CoursesService {
     return this.courseRepository.save(existingCourse);
   }
 
-  async changePublishDetails(props: {
-    courseId: number;
-    title?: string;
-    description?: string;
-    tags?: string[];
-  }) {
+  async changePublishDetails(props: ChangePublishDetailsDto) {
     let existingCourse = await this.getById({ courseId: props.courseId });
     /*
       If the course is not completed or is already posted then the user can't change publishing details
@@ -217,5 +212,25 @@ export class CoursesService {
     existingCourse.postedDate = new Date().toString();
 
     return this.courseRepository.save(existingCourse);
+  }
+
+  async enroll(props: { userId: number; courseId: number }) {
+    let toEnrollCourse = await this.getById({ courseId: props.courseId });
+
+    if (toEnrollCourse.user === props.userId) {
+      // TODO Handle error
+      return null;
+    }
+
+    toEnrollCourse = {
+      ...toEnrollCourse,
+      user: props.userId,
+      completed: false,
+      completedSteps: 0,
+    };
+
+    let newCourseOfUser = { ...toEnrollCourse, id: undefined };
+
+    return this.courseRepository.save(newCourseOfUser);
   }
 }
