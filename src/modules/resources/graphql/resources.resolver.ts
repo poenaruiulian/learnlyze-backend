@@ -8,13 +8,13 @@ export class ResourcesResolver {
   constructor(private resourceService: ResourceService) {}
 
   @Mutation()
-  async replaceResource(
+  async replace(
     @RequestGraphql() req: any,
     @Args({ name: 'stepId', type: () => Number }) stepId: number,
     @Args({ name: 'resourceId', type: () => Number }) resourceId: number,
     @Args({ name: 'feedback', type: () => String }) feedback: string,
   ) {
-    return this.resourceService.replaceResource({
+    return this.resourceService.replace({
       stepId,
       resourceId,
       feedback,

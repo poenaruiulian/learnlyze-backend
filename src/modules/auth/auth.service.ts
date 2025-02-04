@@ -1,15 +1,21 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService, User } from '../users';
+import { UsersService, User, CreateUserDto } from '../users';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto';
-import { handlePasswordDecryption } from './helpers';
-import { IncorrectPassword, UserNotFoundException } from '../../common';
+import { handlePasswordDecryption, handlePasswordEncryption } from './helpers';
+import {
+  DefaultError,
+  EmailAlreadyInUse,
+  ErrorCodes,
+  IncorrectPassword,
+  UserNotFoundException,
+} from '../../common';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
+    private userService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
@@ -18,7 +24,7 @@ export class AuthService {
     email,
     password: pass,
   }: LoginDto): Promise<{ access_token: string }> {
-    const user: User | null = await this.usersService.findOne(email);
+    const user: User | null = await this.userService.findOne(email);
 
     const dbPassword = await handlePasswordDecryption(user?.password ?? '');
     const receivedPass = await handlePasswordDecryption(pass);
@@ -38,5 +44,22 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_SECRET'),
       }),
     };
+  }
+
+  async register(createUserDto: CreateUserDto) {
+    createUserDto.password = await handlePasswordEncryption(
+      createUserDto.password,
+    );
+
+    if (await this.userService.findOne(createUserDto.email)) {
+      throw new EmailAlreadyInUse();
+    }
+
+    return this.userService
+      .create(createUserDto)
+      .then(({ email, password }) => this.logIn({ email, password }))
+      .catch(() => {
+        throw new DefaultError(ErrorCodes.couldNotBeSaved);
+      });
   }
 }

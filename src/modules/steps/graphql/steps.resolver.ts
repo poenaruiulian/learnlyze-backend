@@ -8,20 +8,20 @@ export class StepsResolver {
   constructor(private stepsService: StepsService) {}
 
   @Mutation()
-  async changeStepState(
+  async changeCompletionState(
     @RequestGraphql() req: any,
     @Args({ name: 'stepId', type: () => Number }) stepId: number,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    return this.stepsService.changeStepState({ stepId, courseId });
+    return this.stepsService.changeCompletionState({ stepId, courseId });
   }
 
   @Mutation()
-  async breakStep(
+  async break(
     @RequestGraphql() req: any,
     @Args({ name: 'stepId', type: () => Number }) stepId: number,
     @Args({ name: 'feedback', type: () => String }) feedback: string,
   ) {
-    return this.stepsService.breakStep({ stepId, feedback });
+    return this.stepsService.break({ stepId, feedback });
   }
 }

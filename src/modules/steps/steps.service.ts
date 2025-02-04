@@ -89,7 +89,7 @@ export class StepsService {
     }
   }
 
-  async changeStepState({
+  async changeCompletionState({
     stepId: id,
     courseId,
   }: {
@@ -124,13 +124,7 @@ export class StepsService {
     return updatedStep;
   }
 
-  async breakStep({
-    stepId: id,
-    feedback,
-  }: {
-    stepId: number;
-    feedback: string;
-  }) {
+  async break({ stepId: id, feedback }: { stepId: number; feedback: string }) {
     const foundStep = await this.stepRepository.findOneBy({ id });
 
     if (!foundStep) {

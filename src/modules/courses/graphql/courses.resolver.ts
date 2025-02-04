@@ -1,10 +1,9 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CoursesService } from '../courses.service';
 import { Course } from '../entities';
-import { ResourceService } from '../../resources';
-import { StepsService } from '../../steps';
 import { UsersService } from '../../users';
 import { RequestGraphql, UserNotFoundException } from '../../../common';
+import { ChangePublishDetailsDto } from '../dto';
 
 @Resolver(() => Course)
 export class CoursesResolver {
@@ -70,9 +69,19 @@ export class CoursesResolver {
   @Mutation()
   async changePublishDetails(
     @RequestGraphql() req: any,
-    @Args('input') data: ChangePublishDetailsDto,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
+    @Args({ name: 'title', type: () => String, nullable: true }) title?: string,
+    @Args({ name: 'description', type: () => String, nullable: true })
+    description?: string,
+    @Args({ name: 'tags', type: () => [String], nullable: true })
+    tags?: string[],
   ) {
-    return this.coursesService.changePublishDetails(data);
+    return this.coursesService.changePublishDetails({
+      courseId,
+      title,
+      description,
+      tags,
+    });
   }
 
   @Mutation()
