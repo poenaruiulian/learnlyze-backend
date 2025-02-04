@@ -1,3 +1,7 @@
 type Query {
     getAll: [Course]
 }
+
+type Query {
+    getAllCommunity: [Course]
+}

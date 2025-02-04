@@ -38,6 +38,18 @@ export class CoursesResolver {
     return this.coursesService.getAll({ userId: user.id });
   }
 
+  @Query()
+  @Query()
+  async getAllCommunity(@RequestGraphql() req: any) {
+    const user = await this.userService.findOneOrThrow(req.user['email']);
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    return this.coursesService.getAllCommunity({ userId: user.id });
+  }
+
   @Mutation()
   async getFullById(
     @RequestGraphql() req: any,

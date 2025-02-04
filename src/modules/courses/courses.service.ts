@@ -1,7 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { CourseOperationsDto, CourseGenerationDto, ChangePublishDetailsDto } from './dto';
+import {
+  CourseOperationsDto,
+  CourseGenerationDto,
+  ChangePublishDetailsDto,
+} from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Course } from './entities';
 import {
   formatCourseForGraphQL,
@@ -112,7 +116,14 @@ export class CoursesService {
   }
 
   async getAll({ userId: user }: { userId: number }) {
-    return this.courseRepository.findBy({ user });
+    return this.courseRepository.findBy({ user, enrolledId: IsNull() });
+  }
+
+  async getAllCommunity(props: { userId: number }) {
+    return this.courseRepository.findBy({
+      user: props.userId,
+      enrolledId: Not(IsNull()),
+    });
   }
 
   async getById({ courseId: id }: CourseOperationsDto) {
@@ -217,7 +228,15 @@ export class CoursesService {
   async enroll(props: { userId: number; courseId: number }) {
     let toEnrollCourse = await this.getById({ courseId: props.courseId });
 
-    if (toEnrollCourse.user === props.userId) {
+    const communityCourses = await this.getAllCommunity({
+      userId: props.userId,
+    });
+    const isAlreadyEnrolled =
+      communityCourses.filter(
+        (course) => course.enrolledId === toEnrollCourse.id,
+      ).length !== 0;
+
+    if (toEnrollCourse.user === props.userId || isAlreadyEnrolled) {
       // TODO Handle error
       return null;
     }
@@ -227,6 +246,7 @@ export class CoursesService {
       user: props.userId,
       completed: false,
       completedSteps: 0,
+      enrolledId: toEnrollCourse.id,
     };
 
     let newCourseOfUser = { ...toEnrollCourse, id: undefined };
