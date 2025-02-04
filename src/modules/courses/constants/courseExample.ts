@@ -1,4 +1,4 @@
-import { ThirdFormGeneratedCourse } from '../interfaces/ThirdFormGeneratedCourse';
+import { ThirdFormGeneratedCourse } from '../interfaces';
 
 // This is an example of how the final form of a course should be returned,
 // and it will be used as a placeholder for the real time generation for DEV purposes

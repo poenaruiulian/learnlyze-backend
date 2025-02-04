@@ -10,7 +10,6 @@ import { RequestGraphql, UserNotFoundException } from '../../../common';
 export class CoursesResolver {
   constructor(
     private coursesService: CoursesService,
-    private resourceService: ResourceService,
     private userService: UsersService,
   ) {}
 
@@ -21,24 +20,15 @@ export class CoursesResolver {
   ) {
     const user = await this.userService.findOne(req.user['email']);
 
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-
-    return this.coursesService.generateCourse(
-      { userId: user.id, description },
-      this.resourceService,
-    );
+    return this.coursesService.generate({ userId: user.id, description });
   }
 
+  @Query()
   @Query()
   async getCourses(@RequestGraphql() req: any) {
     const user = await this.userService.findOne(req.user['email']);
 
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-    return this.coursesService.getCourses({ userId: user.id });
+    return this.coursesService.getAll({ userId: user.id });
   }
 
   @Mutation()
@@ -46,13 +36,7 @@ export class CoursesResolver {
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    const user = await this.userService.findOne(req.user['email']);
-
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-
-    return this.coursesService.getCourseById({
+    return this.coursesService.getFullById({
       courseId,
     });
   }
@@ -62,7 +46,7 @@ export class CoursesResolver {
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    return this.coursesService.accessCourse({
+    return this.coursesService.access({
       courseId,
     });
   }
@@ -72,7 +56,7 @@ export class CoursesResolver {
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    return this.coursesService.completeCourse({ courseId });
+    return this.coursesService.complete({ courseId });
   }
 
   @Mutation()
@@ -98,6 +82,6 @@ export class CoursesResolver {
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    return this.coursesService.publishCourse({ courseId });
+    return this.coursesService.publish({ courseId });
   }
 }

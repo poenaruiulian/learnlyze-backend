@@ -1,5 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { CourseGenerationDto } from './dto';
+import { CourseGenerationDto, CourseOperationsDto } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities';
@@ -27,10 +27,13 @@ export class CoursesService {
     private stepService: StepsService,
   ) {}
 
-  async generateCourse(
-    courseGenerationDto: CourseGenerationDto,
-    resourceService: ResourceService,
-  ) {
+  async generate(courseGenerationDto: CourseGenerationDto) {
+    /*
+      For testing purposes we can generate a test course.
+      args - represents the arguments from the command line
+      shouldReturnTestCourse - verifies if the app started in the test mode
+    */
+
     const args = process.argv.slice(2);
     const shouldReturnTestCourse = args.includes('test-course');
 
@@ -40,12 +43,21 @@ export class CoursesService {
 
     const newCourse = shouldReturnTestCourse
       ? courseExample
-      : await generateCourse(courseGenerationDto.description, resourceService);
+      : await generateCourse(
+          courseGenerationDto.description,
+          this.resourceService,
+        );
 
     if (!newCourse) {
       Logger.error('Final form of the course is null');
       throw new LastFormOfTheCourseFailed();
     }
+
+    /*
+      The third form of the course will contain a list of steps and a list of resources.
+      In the next part of the code we iterate through the list of steps from the generated course
+      and save each step in the database.
+    */
 
     const stepsIds: number[] = [];
 
@@ -54,7 +66,7 @@ export class CoursesService {
       const resourcesIds: number[] = [];
 
       for (const resource of resources) {
-        const response = await resourceService.findOneByExternal(
+        const response = await this.resourceService.findOneByExternal(
           resource.external,
         );
         if (response) {
@@ -90,35 +102,39 @@ export class CoursesService {
     return await this.courseRepository
       .save(course)
       .then((response) =>
-        formatCourseForGraphQL(response, this.stepService, resourceService),
+        formatCourseForGraphQL(
+          response,
+          this.stepService,
+          this.resourceService,
+        ),
       )
       .catch((error) => Logger.error(error));
   }
 
-  async getCourses({ userId: user }: { userId: number }) {
+  async getAll({ userId: user }: { userId: number }) {
     return this.courseRepository.findBy({ user });
   }
 
-  async getCourseById({ courseId }: { courseId: number }) {
+  async getById({ courseId: id }: CourseOperationsDto) {
     const courseDetails = await this.courseRepository.findOneBy({
-      id: courseId,
+      id,
     });
 
     if (!courseDetails) {
       throw new CourseNotFoundException();
     }
 
+    return courseDetails;
+  }
+
+  async getFullById(props: CourseOperationsDto) {
+    const courseDetails = await this.getById(props);
+
     return getFullCourse(courseDetails, this.stepService, this.resourceService);
   }
 
-  async accessCourse({ courseId }: { courseId: number }) {
-    let existingCourse = await this.courseRepository.findOneBy({
-      id: courseId,
-    });
-
-    if (!existingCourse) {
-      throw new CourseNotFoundException();
-    }
+  async access(props: CourseOperationsDto) {
+    let existingCourse = await this.getById(props);
 
     existingCourse.lastAccessed = new Date().toString();
 
@@ -146,14 +162,8 @@ export class CoursesService {
     return this.courseRepository.save(existingCourse);
   }
 
-  async completeCourse({ courseId }: { courseId: number }) {
-    let existingCourse = await this.courseRepository.findOneBy({
-      id: courseId,
-    });
-
-    if (!existingCourse) {
-      throw new CourseNotFoundException();
-    }
+  async complete(props: CourseOperationsDto) {
+    let existingCourse = await this.getById(props);
 
     existingCourse.completed = true;
 
@@ -166,16 +176,12 @@ export class CoursesService {
     description?: string;
     tags?: string[];
   }) {
-    let existingCourse = await this.courseRepository.findOneBy({
-      id: props.courseId,
-    });
-
-    if (!existingCourse) {
-      // TODO Handle errors
-      return null;
-    }
-
-    if (!existingCourse.completed) {
+    let existingCourse = await this.getById({ courseId: props.courseId });
+    /*
+      If the course is not completed or is already posted then the user can't change publishing details
+      A course can be already posted if the course is from the community and the user enrolled
+    */
+    if (!existingCourse.completed || existingCourse.postedDate) {
       // TODO Handle errors
       return null;
     }
@@ -190,20 +196,19 @@ export class CoursesService {
     return this.courseRepository.save(existingCourse);
   }
 
-  async publishCourse({ courseId }: { courseId: number }) {
-    let existingCourse = await this.courseRepository.findOneBy({
-      id: courseId,
-    });
+  async publish(props: CourseOperationsDto) {
+    let existingCourse = await this.getById(props);
 
-    if (!existingCourse) {
-      // TODO Handle errors
-      return null;
-    }
-
+    /*
+      If the course is not completed or no tags where specified or no description then the request will fail
+      If the course was already posted, meaning that the user enrolled to it, then the course can't be posted again,
+      so the request will also fail.
+    */
     if (
       !existingCourse.completed ||
       !existingCourse.tags ||
-      !existingCourse.description
+      !existingCourse.description ||
+      existingCourse.postedDate
     ) {
       // TODO Handle errors
       return null;
