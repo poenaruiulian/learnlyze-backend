@@ -1,17 +1,17 @@
 type Mutation {
-    generateCourse(description: String): FullCourse
+    generate (description: String): FullCourse
 }
 
 type Mutation {
-    getCourseById(courseId: Int!): FullCourse
+    getFullById(courseId: Int!): FullCourse
 }
 
 type Mutation {
-    accessCourse(courseId: Int!): Course
+    access(courseId: Int!): Course
 }
 
 type Mutation {
-    completeCourse(courseId: Int!): Course
+    complete(courseId: Int!): Course
 }
 
 type Mutation {
@@ -19,5 +19,9 @@ type Mutation {
 }
 
 type Mutation {
-    publishCourse(courseId: Int!): Course
+    publish(courseId: Int!): Course
+}
+
+type Mutation {
+    enroll(courseId: Int!): Course
 }

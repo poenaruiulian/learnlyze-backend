@@ -55,4 +55,8 @@ export class Course {
   @Field()
   @Column({ default: false })
   completed: boolean;
+
+  @Field()
+  @Column({ nullable: true })
+  enrolledId: number;
 }

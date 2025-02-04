@@ -12,10 +12,7 @@ import { handlePasswordEncryption } from './helpers';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private userService: UsersService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Public()
   @HttpCode(HttpStatus.OK)
@@ -29,21 +26,6 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
-    createUserDto.password = await handlePasswordEncryption(
-      createUserDto.password,
-    );
-
-    if (await this.userService.findOne(createUserDto.email)) {
-      throw new EmailAlreadyInUse();
-    }
-
-    return this.userService
-      .create(createUserDto)
-      .then(({ email, password }) =>
-        this.authService.logIn({ email, password }),
-      )
-      .catch(() => {
-        throw new DefaultError(ErrorCodes.couldNotBeSaved);
-      });
+    return this.authService.register(createUserDto);
   }
 }

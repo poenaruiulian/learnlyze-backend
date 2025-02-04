@@ -1,78 +1,81 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CoursesService } from '../courses.service';
 import { Course } from '../entities';
-import { ResourceService } from '../../resources';
-import { StepsService } from '../../steps';
 import { UsersService } from '../../users';
 import { RequestGraphql, UserNotFoundException } from '../../../common';
+import { ChangePublishDetailsDto } from '../dto';
 
 @Resolver(() => Course)
 export class CoursesResolver {
   constructor(
     private coursesService: CoursesService,
-    private resourceService: ResourceService,
     private userService: UsersService,
   ) {}
 
   @Mutation()
-  async generateCourse(
+  async generate(
     @RequestGraphql() req: any,
     @Args({ name: 'description', type: () => String }) description: string,
   ) {
-    const user = await this.userService.findOne(req.user['email']);
+    const user = await this.userService.findOneOrThrow(req.user['email']);
 
     if (!user) {
       throw new UserNotFoundException();
     }
 
-    return this.coursesService.generateCourse(
-      { userId: user.id, description },
-      this.resourceService,
-    );
+    return this.coursesService.generate({ userId: user.id, description });
   }
 
   @Query()
-  async getCourses(@RequestGraphql() req: any) {
-    const user = await this.userService.findOne(req.user['email']);
-
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-    return this.coursesService.getCourses({ userId: user.id });
-  }
-
-  @Mutation()
-  async getCourseById(
-    @RequestGraphql() req: any,
-    @Args({ name: 'courseId', type: () => Number }) courseId: number,
-  ) {
-    const user = await this.userService.findOne(req.user['email']);
+  @Query()
+  async getAll(@RequestGraphql() req: any) {
+    const user = await this.userService.findOneOrThrow(req.user['email']);
 
     if (!user) {
       throw new UserNotFoundException();
     }
 
-    return this.coursesService.getCourseById({
+    return this.coursesService.getAll({ userId: user.id });
+  }
+
+  @Query()
+  @Query()
+  async getAllCommunity(@RequestGraphql() req: any) {
+    const user = await this.userService.findOneOrThrow(req.user['email']);
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    return this.coursesService.getAllCommunity({ userId: user.id });
+  }
+
+  @Mutation()
+  async getFullById(
+    @RequestGraphql() req: any,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
+  ) {
+    return this.coursesService.getFullById({
       courseId,
     });
   }
 
   @Mutation()
-  async accessCourse(
+  async access(
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    return this.coursesService.accessCourse({
+    return this.coursesService.access({
       courseId,
     });
   }
 
   @Mutation()
-  async completeCourse(
+  async complete(
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    return this.coursesService.completeCourse({ courseId });
+    return this.coursesService.complete({ courseId });
   }
 
   @Mutation()
@@ -94,10 +97,20 @@ export class CoursesResolver {
   }
 
   @Mutation()
-  async publishCourse(
+  async publish(
     @RequestGraphql() req: any,
     @Args({ name: 'courseId', type: () => Number }) courseId: number,
   ) {
-    return this.coursesService.publishCourse({ courseId });
+    return this.coursesService.publish({ courseId });
+  }
+
+  @Mutation()
+  async enroll(
+    @RequestGraphql() req: any,
+    @Args({ name: 'courseId', type: () => Number }) courseId: number,
+  ) {
+    const user = await this.userService.findOneOrThrow(req.user['email']);
+
+    return this.coursesService.enroll({ userId: user.id, courseId });
   }
 }

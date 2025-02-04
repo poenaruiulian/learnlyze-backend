@@ -159,7 +159,7 @@ export class ResourceService {
     return await this.resourceRepository.findOneBy({ id });
   }
 
-  async replaceResource({
+  async replace({
     stepId,
     resourceId,
     feedback,
