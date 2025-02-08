@@ -5,3 +5,7 @@ type Query {
 type Query {
     getAllCommunity: [Course]
 }
+
+type Query {
+    getDiscover(tags: [String], search: String): [Course]
+}
