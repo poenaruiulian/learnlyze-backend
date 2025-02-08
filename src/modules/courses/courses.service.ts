@@ -3,6 +3,7 @@ import {
   CourseOperationsDto,
   CourseGenerationDto,
   ChangePublishDetailsDto,
+  DiscoverCoursesDto,
 } from './dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Not, Repository } from 'typeorm';
@@ -119,11 +120,40 @@ export class CoursesService {
     return this.courseRepository.findBy({ user, enrolledId: IsNull() });
   }
 
-  async getAllCommunity(props: { userId: number }) {
+  async getAllCommunity({ userId: user }: { userId: number }) {
     return this.courseRepository.findBy({
-      user: props.userId,
+      user,
       enrolledId: Not(IsNull()),
     });
+  }
+
+  async getDiscover(props: DiscoverCoursesDto) {
+    let courses = await this.courseRepository.findBy({
+      user: Not(props.userId),
+      postedDate: Not(IsNull()),
+    });
+
+    if (!courses) {
+      // TODO Handle error
+      return null;
+    }
+
+    if (props.tags) {
+      courses = courses.filter((course) => {
+        const commonTags = course.tags?.filter((tag) =>
+          props.tags?.includes(tag),
+        );
+        return commonTags?.length === props.tags?.length;
+      });
+    }
+
+    if (props.search) {
+      courses = courses.filter((courses) =>
+        courses.title.startsWith(props.search!),
+      );
+    }
+
+    return courses;
   }
 
   async getById({ courseId: id }: CourseOperationsDto) {

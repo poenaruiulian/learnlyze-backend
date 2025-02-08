@@ -39,7 +39,6 @@ export class CoursesResolver {
   }
 
   @Query()
-  @Query()
   async getAllCommunity(@RequestGraphql() req: any) {
     const user = await this.userService.findOneOrThrow(req.user['email']);
 
@@ -48,6 +47,23 @@ export class CoursesResolver {
     }
 
     return this.coursesService.getAllCommunity({ userId: user.id });
+  }
+
+  @Query()
+  async getDiscover(
+    @RequestGraphql() req: any,
+    @Args({ name: 'tags', type: () => [String], nullable: true })
+    tags: string[],
+    @Args({ name: 'search', type: () => String, nullable: true })
+    search: string,
+  ) {
+    const user = await this.userService.findOneOrThrow(req.user['email']);
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    return this.coursesService.getDiscover({ userId: user.id, search, tags });
   }
 
   @Mutation()
