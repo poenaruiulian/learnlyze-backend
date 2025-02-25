@@ -7,7 +7,15 @@ import { InjectCore, PuppeteerCore } from 'nestjs-pptr';
 import { Page } from 'puppeteer';
 import { fillDataFromPage, scrollPage } from './helpers';
 import { StepsService } from '../steps';
-import { handleOpenAIRequests, Logger } from '../../common';
+import {
+  handleOpenAIRequests,
+  Logger,
+  StepNotFoundException,
+  ResourceNotFoundException,
+  NewSearchPhraseFailedException,
+  ResourceGenerationFailedException,
+  ErrorDescriptions,
+} from '../../common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -171,9 +179,12 @@ export class ResourceService {
     const foundResource = await this.findOneById(resourceId);
     const foundStep = await this.stepService.findOneById(stepId);
 
-    if (!foundStep || !foundResource) {
-      // TODO Handle error
-      return null;
+    if (!foundStep) {
+      throw new StepNotFoundException();
+    }
+
+    if (!foundResource) {
+      throw new ResourceNotFoundException();
     }
 
     const newSearchPhrase = await handleOpenAIRequests({
@@ -187,8 +198,8 @@ export class ResourceService {
     });
 
     if (!newSearchPhrase) {
-      // TODO Handle error
-      return null;
+      Logger.error(ErrorDescriptions.newSearchPhraseFailed);
+      throw new NewSearchPhraseFailedException();
     }
 
     const configService = new ConfigService();
@@ -236,9 +247,11 @@ export class ResourceService {
     }
 
     if (!resource) {
-      // TODO Handle error
-      return null;
+      throw new ResourceGenerationFailedException();
     }
+
+    // If the resource was created successfully then we add it to the database
+    // and replace the old resource id with the newly created resource.
 
     const newResource = await this.create(resource);
 
@@ -247,9 +260,6 @@ export class ResourceService {
     );
 
     await this.stepService.save(foundStep);
-
-    console.log('newSearchPhrase', newSearchPhrase);
-    console.log(foundResource, newResource);
 
     return newResource;
   }

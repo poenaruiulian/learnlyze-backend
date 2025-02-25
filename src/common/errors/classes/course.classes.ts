@@ -1,44 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { ErrorCodes, ErrorDescriptions, ErrorMessages } from './enums';
-
-export class UserNotFoundException extends HttpException {
-  constructor() {
-    super(
-      {
-        message: ErrorMessages.userNotFound,
-        description: ErrorDescriptions.userNotFound,
-        code: ErrorCodes.userNotFound,
-      },
-      HttpStatus.NOT_FOUND,
-    );
-  }
-}
-
-export class IncorrectPassword extends HttpException {
-  constructor() {
-    super(
-      {
-        message: ErrorMessages.incorrectPassword,
-        description: ErrorDescriptions.incorrectPassword,
-        code: ErrorCodes.incorrectPassword,
-      },
-      HttpStatus.UNAUTHORIZED,
-    );
-  }
-}
-
-export class EmailAlreadyInUse extends HttpException {
-  constructor() {
-    super(
-      {
-        message: ErrorMessages.emailAlreadyInUse,
-        description: ErrorDescriptions.emailAlreadyInUse,
-        code: ErrorCodes.emailAlreadyInUse,
-      },
-      HttpStatus.BAD_REQUEST,
-    );
-  }
-}
+import { ErrorCodes, ErrorDescriptions, ErrorMessages } from '../enums';
 
 export class FirstFormOfTheCourseFailed extends HttpException {
   constructor() {
@@ -92,28 +53,54 @@ export class CourseNotFoundException extends HttpException {
   }
 }
 
-export class StepNotFoundException extends HttpException {
+export class CoursesNotFoundException extends HttpException {
   constructor() {
     super(
       {
-        message: ErrorMessages.stepNotFound,
+        message: ErrorMessages.coursesNotFound,
         description: ErrorDescriptions.somethingWentWrong,
-        code: ErrorCodes.stepNotFound,
+        code: ErrorCodes.coursesNotFound,
       },
       HttpStatus.NOT_FOUND,
     );
   }
 }
 
-export class DefaultError extends HttpException {
-  constructor(code: ErrorCodes) {
+export class AlreadyPublishedException extends HttpException {
+  constructor() {
     super(
       {
-        message: ErrorMessages.somethingWentWrong,
-        description: ErrorDescriptions.somethingWentWrong,
-        code,
+        message: ErrorMessages.alreadyPublished,
+        description: ErrorDescriptions.alreadyPublished,
+        code: ErrorCodes.alreadyPublished,
       },
-      HttpStatus.INTERNAL_SERVER_ERROR,
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
+export class CantPublishException extends HttpException {
+  constructor() {
+    super(
+      {
+        message: ErrorMessages.cantPublish,
+        description: ErrorDescriptions.cantPublish,
+        code: ErrorCodes.cantPublish,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
+export class CantEnrollException extends HttpException {
+  constructor() {
+    super(
+      {
+        message: ErrorMessages.cantEnroll,
+        description: ErrorDescriptions.cantEnroll,
+        code: ErrorCodes.cantEnroll,
+      },
+      HttpStatus.BAD_REQUEST,
     );
   }
 }

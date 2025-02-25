@@ -5,8 +5,14 @@ import { Repository } from 'typeorm';
 import { CreateStepDto } from './dto';
 import { CoursesService } from '../courses';
 import {
+  DescriptionFailedException,
+  ErrorDescriptions,
   handleOpenAIRequests,
   Logger,
+  SecondFormStepsFailedException,
+  StepGenerationExceededException,
+  StepGenerationFailedException,
+  StepHasChildException,
   StepNotFoundException,
 } from '../../common';
 import { generateSubSteps } from './helpers';
@@ -131,18 +137,22 @@ export class StepsService {
       throw new StepNotFoundException();
     }
 
+    // The generation of a step is defined by how many parent step are above the current step
+    // This precaution method was created to avoid the possibility of
+    // an infinite number of sub-steps
     if (foundStep.generation === 2) {
-      // TODO Handle generation error
-      Logger.warning('The nesting of substeps is too deep.');
-      return null;
+      Logger.error(ErrorDescriptions.stepGenerationExceeded);
+      throw new StepGenerationExceededException();
     }
 
+    // A step has a child if a set of sub-steps with the
+    // parentId of the current step already exist
     if (foundStep.hasChild) {
-      // TODO Handle generation error
-      Logger.warning('This child already has a set of subsets.');
-      return null;
+      Logger.error(ErrorDescriptions.stepHasChild);
+      throw new StepHasChildException();
     }
 
+    // Generate the structure of the steps (which are essentially basic steps but with more context)
     const generatedSubSteps = await generateSubSteps({
       title: foundStep.title,
       description: foundStep.description,
@@ -150,23 +160,26 @@ export class StepsService {
     });
 
     if (!generatedSubSteps) {
-      // TODO Handle error
-      return null;
+      Logger.error(ErrorDescriptions.stepsGenerationFailed);
+      throw new StepGenerationFailedException();
     }
 
-    const secondForGeneratedSteps = await generateSecondFormSteps(
+    // The second form a group of steps represents the initial set
+    // but with the resources fetched (YoutubeAPI/Scrapper/Local)
+    const secondFormGeneratedSteps = await generateSecondFormSteps(
       generatedSubSteps,
       this.resourceService,
     );
 
-    if (!secondForGeneratedSteps) {
-      // TODO Handle error
-      return null;
+    if (!secondFormGeneratedSteps) {
+      Logger.error(ErrorDescriptions.stepsSecondFormGenerationFailed);
+      throw new SecondFormStepsFailedException();
     }
 
     let insertedSteps: Step[] = [];
 
-    for (const step of secondForGeneratedSteps) {
+    // For each step we want to generate a suitable description using OpenAI
+    for (const step of secondFormGeneratedSteps) {
       let descriptions = await handleOpenAIRequests({
         description: step.title,
         type: 'generateDescriptionTitleBased',
@@ -174,6 +187,8 @@ export class StepsService {
 
       descriptions = descriptions ? JSON.parse(descriptions) : descriptions;
 
+      // If the description failed to parse, meaning the response was not satisfied
+      // we retry the process one more time before throwing an error
       if (!descriptions) {
         descriptions = await handleOpenAIRequests({
           description: step.title,
@@ -183,11 +198,14 @@ export class StepsService {
         descriptions = descriptions ? JSON.parse(descriptions) : descriptions;
 
         if (!descriptions) {
-          // TODO Handle error
-          return null;
+          Logger.error(ErrorDescriptions.descriptionFailedToGenerate);
+          throw new DescriptionFailedException();
         }
       }
 
+      // And also, for each step we want to create the list of resources available
+      // These resources are found through the external string, this string being
+      // available in the second form of the generated steps.
       const resourcesIds: number[] = [];
 
       for (const resource of step.resources) {
