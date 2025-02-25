@@ -16,7 +16,12 @@ import {
 import { ResourceService } from '../resources';
 import { CreateStepDto, Step, StepsService } from '../steps';
 import {
+  AlreadyPublishedException,
+  CantEnrollException,
+  CantPublishException,
   CourseNotFoundException,
+  CoursesNotFoundException,
+  ErrorDescriptions,
   LastFormOfTheCourseFailed,
   Logger,
 } from '../../common';
@@ -133,8 +138,7 @@ export class CoursesService {
     });
 
     if (!courses) {
-      // TODO Handle error
-      return null;
+      throw new CoursesNotFoundException();
     }
 
     if (props.tags) {
@@ -218,8 +222,8 @@ export class CoursesService {
       A course can be already posted if the course is from the community and the user enrolled
     */
     if (!existingCourse.completed || existingCourse.postedDate) {
-      // TODO Handle errors
-      return null;
+      Logger.error(ErrorDescriptions.alreadyPublished);
+      return new AlreadyPublishedException();
     }
 
     existingCourse = {
@@ -246,8 +250,8 @@ export class CoursesService {
       !existingCourse.description ||
       existingCourse.postedDate
     ) {
-      // TODO Handle errors
-      return null;
+      Logger.error(ErrorDescriptions.cantPublish);
+      throw new CantPublishException();
     }
 
     existingCourse.postedDate = new Date().toString();
@@ -259,8 +263,7 @@ export class CoursesService {
     const toEnrollCourse = await this.getById({ courseId: props.courseId });
 
     if (!toEnrollCourse) {
-      // TODO Handle error
-      return null;
+      throw new CoursesNotFoundException();
     }
 
     // Fetch user's enrolled community courses
@@ -275,7 +278,8 @@ export class CoursesService {
 
     // Prevent enrolling if the user owns the course or is already enrolled
     if (toEnrollCourse.user === props.userId || isAlreadyEnrolled) {
-      throw new Error('User is already enrolled or owns the course');
+      Logger.error(ErrorDescriptions.cantEnroll);
+      throw new CantEnrollException();
     }
 
     const newStepsIds: number[] = [];
