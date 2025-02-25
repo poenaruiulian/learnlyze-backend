@@ -9,7 +9,8 @@ type Course {
     postedDate: String
     completedSteps: Int!
     steps: [Int]
-    complete: Boolean!
+    completed: Boolean
+    enrolledId: Int
 }
 
 type FullCourse {

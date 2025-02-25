@@ -14,7 +14,7 @@ import {
   getFullCourse,
 } from './helpers';
 import { ResourceService } from '../resources';
-import { CreateStepDto, StepsService } from '../steps';
+import { CreateStepDto, Step, StepsService } from '../steps';
 import {
   CourseNotFoundException,
   LastFormOfTheCourseFailed,
@@ -129,7 +129,6 @@ export class CoursesService {
 
   async getDiscover(props: DiscoverCoursesDto) {
     let courses = await this.courseRepository.findBy({
-      user: Not(props.userId),
       postedDate: Not(IsNull()),
     });
 
@@ -143,7 +142,8 @@ export class CoursesService {
         const commonTags = course.tags?.filter((tag) =>
           props.tags?.includes(tag),
         );
-        return commonTags?.length === props.tags?.length;
+
+        return commonTags && commonTags.length > 0;
       });
     }
 
@@ -256,31 +256,80 @@ export class CoursesService {
   }
 
   async enroll(props: { userId: number; courseId: number }) {
-    let toEnrollCourse = await this.getById({ courseId: props.courseId });
+    const toEnrollCourse = await this.getById({ courseId: props.courseId });
 
-    const communityCourses = await this.getAllCommunity({
-      userId: props.userId,
-    });
-    const isAlreadyEnrolled =
-      communityCourses.filter(
-        (course) => course.enrolledId === toEnrollCourse.id,
-      ).length !== 0;
-
-    if (toEnrollCourse.user === props.userId || isAlreadyEnrolled) {
+    if (!toEnrollCourse) {
       // TODO Handle error
       return null;
     }
 
-    toEnrollCourse = {
+    // Fetch user's enrolled community courses
+    const communityCourses = await this.getAllCommunity({
+      userId: props.userId,
+    });
+
+    // Check if user is already enrolled
+    const isAlreadyEnrolled = communityCourses.some(
+      (course) => course.enrolledId === toEnrollCourse.id,
+    );
+
+    // Prevent enrolling if the user owns the course or is already enrolled
+    if (toEnrollCourse.user === props.userId || isAlreadyEnrolled) {
+      throw new Error('User is already enrolled or owns the course');
+    }
+
+    const newStepsIds: number[] = [];
+
+    for (const stepId of toEnrollCourse.steps) {
+      const copiedStep = await this.stepService.findOneById(stepId);
+      if (!copiedStep) throw new Error(`Step ${stepId} not found`);
+
+      // Copy sub-steps in a structured manner
+      await this.copySubStepsRecursively(stepId);
+
+      // Copy the main step
+      const newStep = await this.stepService.create({
+        parentStep: copiedStep.parentStep ?? null,
+        resources: copiedStep.resources,
+        priority: copiedStep.priority,
+        title: copiedStep.title,
+        description: copiedStep.description,
+        generation: copiedStep.generation,
+      });
+      newStepsIds.push(newStep.id);
+    }
+
+    // Create the new enrolled course
+    const newCourse = {
       ...toEnrollCourse,
       user: props.userId,
       completed: false,
       completedSteps: 0,
       enrolledId: toEnrollCourse.id,
+      postedDate: undefined,
+      steps: newStepsIds,
+      id: undefined,
     };
 
-    let newCourseOfUser = { ...toEnrollCourse, id: undefined };
+    return this.courseRepository.save({ ...newCourse });
+  }
 
-    return this.courseRepository.save(newCourseOfUser);
+  // Recursive helper function to copy sub-steps
+  private async copySubStepsRecursively(parentStepId: number) {
+    const subSteps = await this.stepService.findByParentId(parentStepId);
+    return Promise.all(
+      subSteps.map(async (subStep) => {
+        const newSubStep = await this.stepService.create({
+          parentStep: subStep.parentStep ?? null,
+          resources: subStep.resources,
+          priority: subStep.priority,
+          title: subStep.title,
+          description: subStep.description,
+          generation: subStep.generation,
+        });
+        await this.copySubStepsRecursively(newSubStep.id); // Copy second-gen sub-steps
+        return newSubStep;
+      }),
+    );
   }
 }
