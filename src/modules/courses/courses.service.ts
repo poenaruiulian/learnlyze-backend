@@ -240,15 +240,18 @@ export class CoursesService {
     let existingCourse = await this.getById(props);
 
     /*
-      If the course is not completed or no tags where specified or no description then the request will fail
+      If the course is not completed, no tags where specified or no description then the request will fail.
       If the course was already posted, meaning that the user enrolled to it, then the course can't be posted again,
       so the request will also fail.
+      If the course is already from the community, meaning that it has a reference to another course through enrolledId,
+      then the request should also fail.
     */
     if (
       !existingCourse.completed ||
       !existingCourse.tags ||
       !existingCourse.description ||
-      existingCourse.postedDate
+      existingCourse.postedDate ||
+      existingCourse.enrolledId
     ) {
       Logger.error(ErrorDescriptions.cantPublish);
       throw new CantPublishException();

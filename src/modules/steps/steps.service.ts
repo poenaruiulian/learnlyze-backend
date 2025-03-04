@@ -71,10 +71,12 @@ export class StepsService {
   }
 
   async changeStateOfParent(step: Step, courseId: number) {
+    // Save all the sub-steps of a step
     const subSteps = await this.stepRepository.findBy({
       parentStep: step.parentStep,
     });
 
+    // Check if all the found sub-steps of a step are completed
     const areSubStepsCompleted = subSteps
       .map((step) => step.completed)
       .reduce((previousValue, currentValue) => previousValue && currentValue);
@@ -83,6 +85,8 @@ export class StepsService {
       id: step.parentStep,
     });
 
+    // If the step completion state differs from the one calculated above
+    // we change its state and also change the number of completed steps of the course
     if (parentStep && parentStep.completed !== areSubStepsCompleted) {
       parentStep.completed = areSubStepsCompleted;
 
@@ -114,12 +118,16 @@ export class StepsService {
 
     const updatedStep = await this.stepRepository.save(existingStep);
 
+    // If a step is completed every sub-step under it should be completed as well
     await this.changeStateSubSteps(subSteps, existingStep);
 
+    // If a step is completed there is a possibility that the step represents a sub-step of another step
+    // In that case, we would want to change the state of the parent step too if all the sub-steps are completed
     if (updatedStep.parentStep) {
       await this.changeStateOfParent(updatedStep, courseId);
     }
 
+    // If the step is not a sub-step, we want to change the total number of completed steps of a course
     if (!updatedStep.parentStep) {
       await this.courseService.changeCompletedSteps({
         courseId,
