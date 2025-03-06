@@ -20,6 +20,7 @@ const firstFormGeneratedCoursePrompt = (description: string) => `
     Every course must contain the above needed components, the titles should be kept short, so the user can better memorize them.
     
     Output specifications: 
+      Do not give answers if the user wants to learn about something illegally (example: making bombs) or unethically.
       The answer will be later processed and used to generate more data and store to a database. 
       The answer need to be in a JSON format that can be later converted to an object. 
       Don't add any other unnecessary comments to the answer, just the JSON stringyfied object that should look like in the example below.
