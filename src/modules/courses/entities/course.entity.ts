@@ -59,4 +59,8 @@ export class Course {
   @Field()
   @Column({ nullable: true })
   enrolledId: number;
+
+  @Field()
+  @Column({ default: 0 })
+  numberOfEnrollments: number;
 }

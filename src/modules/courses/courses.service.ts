@@ -263,7 +263,7 @@ export class CoursesService {
   }
 
   async enroll(props: { userId: number; courseId: number }) {
-    const toEnrollCourse = await this.getById({ courseId: props.courseId });
+    let toEnrollCourse = await this.getById({ courseId: props.courseId });
 
     if (!toEnrollCourse) {
       throw new CoursesNotFoundException();
@@ -284,6 +284,13 @@ export class CoursesService {
       Logger.error(ErrorDescriptions.cantEnroll);
       throw new CantEnrollException();
     }
+
+    // Each time a user enrolls to a course, a counter of how many enrollments are will count up
+    toEnrollCourse = {
+      ...toEnrollCourse,
+      numberOfEnrollments: toEnrollCourse.numberOfEnrollments + 1,
+    };
+    await this.courseRepository.save({ ...toEnrollCourse });
 
     const newStepsIds: number[] = [];
 
