@@ -3,3 +3,4 @@ export * from './dto';
 
 export * from './steps.module';
 export * from './steps.service';
+export * from './steps.resolver';

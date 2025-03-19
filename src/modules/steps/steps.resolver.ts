@@ -1,7 +1,7 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { Step } from '../entities';
-import { StepsService } from '../steps.service';
-import { RequestGraphql } from '../../../common';
+import { Step } from './entities';
+import { StepsService } from './steps.service';
+import { RequestGraphql } from '../../common';
 
 @Resolver(() => Step)
 export class StepsResolver {

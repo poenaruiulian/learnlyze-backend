@@ -1,9 +1,9 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { CoursesService } from '../courses.service';
-import { Course } from '../entities';
-import { UsersService } from '../../users';
-import { RequestGraphql, UserNotFoundException } from '../../../common';
-import { ChangePublishDetailsDto } from '../dto';
+import { CoursesService } from './courses.service';
+import { Course } from './entities';
+import { UsersService } from '../users';
+import { RequestGraphql, UserNotFoundException } from '../../common';
+import { ChangePublishDetailsDto } from './dto';
 
 @Resolver(() => Course)
 export class CoursesResolver {

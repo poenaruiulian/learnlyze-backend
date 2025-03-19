@@ -2,11 +2,11 @@ import { forwardRef, Module } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Course } from './entities';
-import { CoursesResolver } from './graphql';
 import { Resource, ResourceService } from '../resources';
-import { Step, StepsModule, StepsService } from '../steps';
+import { StepsModule } from '../steps';
 import { PuppeteerModule } from 'nestjs-pptr';
 import { User, UsersService } from '../users';
+import { CoursesResolver } from './courses.resolver';
 
 @Module({
   imports: [
