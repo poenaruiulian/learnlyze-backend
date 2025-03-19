@@ -1,7 +1,7 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { Resource } from '../entities';
-import { ResourceService } from '../resources.service';
-import { RequestGraphql } from '../../../common';
+import { Resource } from './entities';
+import { ResourceService } from './resources.service';
+import { RequestGraphql } from '../../common';
 
 @Resolver(() => Resource)
 export class ResourcesResolver {

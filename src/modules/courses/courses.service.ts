@@ -294,7 +294,7 @@ export class CoursesService {
       // Copy sub-steps in a structured manner
       await this.copySubStepsRecursively(stepId);
 
-      // Copy the main step
+      // Copy the main step (the parent step)
       const newStep = await this.stepService.create({
         parentStep: copiedStep.parentStep ?? null,
         resources: copiedStep.resources,
@@ -321,7 +321,11 @@ export class CoursesService {
     return this.courseRepository.save({ ...newCourse });
   }
 
-  // Recursive helper function to copy sub-steps
+  /*
+    When a user enrolls to a course we create a new course under the user id.
+    To refresh the steps for the new course of the user we need to copy the steps and create a new set of steps with fresh states.
+    The function below does this recursively to handle all the sub-steps of the step.
+   */
   private async copySubStepsRecursively(parentStepId: number) {
     const subSteps = await this.stepService.findByParentId(parentStepId);
     return Promise.all(
@@ -334,7 +338,7 @@ export class CoursesService {
           description: subStep.description,
           generation: subStep.generation,
         });
-        await this.copySubStepsRecursively(newSubStep.id); // Copy second-gen sub-steps
+        await this.copySubStepsRecursively(newSubStep.id);
         return newSubStep;
       }),
     );

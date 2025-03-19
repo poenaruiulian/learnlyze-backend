@@ -3,8 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Resource } from './entities';
 import { ResourceService } from './resources.service';
 import { PuppeteerCore, PuppeteerModule } from 'nestjs-pptr';
-import { StepsModule, StepsService } from '../steps';
-import { ResourcesResolver } from './graphql/resources.resolver';
+import { StepsModule } from '../steps';
+import { ResourcesResolver } from './resources.resolver';
 
 @Module({
   imports: [

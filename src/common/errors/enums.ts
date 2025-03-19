@@ -4,6 +4,7 @@ export const ErrorMessages = {
   incorrectPassword: 'Incorrect password',
   emailAlreadyInUse: 'This email is already in use',
   somethingWentWrong: 'Something went wrong',
+  updateError: "Couldn't update credentials",
   // Courses
   courseNotFound: 'Course not found',
   coursesNotFound: 'Courses not found',
@@ -29,6 +30,7 @@ export const ErrorDescriptions = {
   userNotFound: 'Please check you credentials and try again.',
   incorrectPassword: 'The password you entered is incorrect. Please try again.',
   emailAlreadyInUse: 'Please try again with another email.',
+  updateError: 'Check the credentials, the may already exists',
   // Courses
   firstFormOfTheCourseFailed: 'The first form of the course failed to generate',
   secondFormOfTheCourseFailed:
@@ -57,6 +59,7 @@ export enum ErrorCodes {
   userNotFound = 'USER_NOT_FOUND',
   incorrectPassword = 'INCORRECT_PASSWORD',
   emailAlreadyInUse = 'EMAIL_ALREADY_IN_USE',
+  updateError = 'UPDATE_ERROR',
   // Courses
   courseGenerationFailed = 'COURSE_GENERATION_FAILED',
   courseNotFound = 'COURSE_NOT_FOUND',
