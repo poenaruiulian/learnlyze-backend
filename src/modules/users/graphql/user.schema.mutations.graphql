@@ -1,0 +1,7 @@
+type Query {
+    user: User
+}
+
+type Mutation {
+    update(newEmail: String, firstName: String, lastName: String): User
+}

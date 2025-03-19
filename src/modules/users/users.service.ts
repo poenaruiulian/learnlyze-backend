@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities';
 import { CreateUserDto } from './dto';
-import { UserNotFoundException } from '../../common';
+import { UpdateFailed, UserNotFoundException } from '../../common';
 
 @Injectable()
 export class UsersService {
@@ -34,5 +34,34 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async updateOne({
+    email,
+    newEmail,
+    firstName,
+    lastName,
+  }: {
+    email: string;
+    newEmail?: string;
+    firstName?: string;
+    lastName?: string;
+  }) {
+    let user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    user = {
+      ...user,
+      firstName: firstName ?? user.firstName,
+      lastName: lastName ?? user.lastName,
+      email: newEmail ?? user.email,
+    };
+
+    return await this.userRepository.save(user).catch(() => {
+      throw new UpdateFailed();
+    });
   }
 }

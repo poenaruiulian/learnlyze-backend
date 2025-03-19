@@ -39,3 +39,16 @@ export class EmailAlreadyInUse extends HttpException {
     );
   }
 }
+
+export class UpdateFailed extends HttpException {
+  constructor() {
+    super(
+      {
+        message: ErrorMessages.updateError,
+        description: ErrorDescriptions.updateError,
+        code: ErrorCodes.updateError,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
