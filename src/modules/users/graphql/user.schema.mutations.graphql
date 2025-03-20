@@ -3,5 +3,5 @@ type Query {
 }
 
 type Mutation {
-    update(newEmail: String, firstName: String, lastName: String): User
+    update(newEmail: String, firstName: String, lastName: String): UpdateResponse
 }

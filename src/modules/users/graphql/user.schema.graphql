@@ -4,3 +4,7 @@ type User {
     lastName: String!
     email: String!
 }
+
+type UpdateResponse {
+    access_token: String
+}

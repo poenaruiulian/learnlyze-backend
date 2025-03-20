@@ -1,14 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities';
 import { CreateUserDto } from './dto';
 import { UpdateFailed, UserNotFoundException } from '../../common';
+import { handlePasswordDecryption } from '../auth/helpers';
+import { AuthService } from '../auth';
+import { StepsService } from '../steps';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @Inject(forwardRef(() => AuthService))
+    private authService: AuthService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -53,6 +58,13 @@ export class UsersService {
       throw new UserNotFoundException();
     }
 
+    console.log({
+      email,
+      newEmail,
+      firstName,
+      lastName,
+    });
+
     user = {
       ...user,
       firstName: firstName ?? user.firstName,
@@ -60,8 +72,21 @@ export class UsersService {
       email: newEmail ?? user.email,
     };
 
-    return await this.userRepository.save(user).catch(() => {
-      throw new UpdateFailed();
-    });
+    const response = await this.userRepository
+      .save(user)
+      .then((updated) => {
+        console.log(user?.password);
+        return this.authService
+          .logIn({ email: updated.email, password: user?.password })
+          .catch(console.log);
+      })
+      .catch((error) => {
+        console.log(error);
+        throw new UpdateFailed();
+      });
+
+    console.log('response:', response);
+
+    return response;
   }
 }

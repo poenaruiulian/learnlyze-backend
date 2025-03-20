@@ -21,7 +21,7 @@ export class UserResolver {
     firstName?: string,
     @Args({ name: 'lastName', type: () => String, nullable: true })
     lastName?: string,
-  ): Promise<User | null> {
+  ) {
     return this.userService.updateOne({
       email: req.user['email'],
       newEmail,

@@ -7,6 +7,8 @@ import { StepsModule } from '../steps';
 import { PuppeteerModule } from 'nestjs-pptr';
 import { User, UsersService } from '../users';
 import { CoursesResolver } from './courses.resolver';
+import { AuthService } from '../auth';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -15,7 +17,14 @@ import { CoursesResolver } from './courses.resolver';
     forwardRef(() => StepsModule),
   ],
   controllers: [],
-  providers: [CoursesService, CoursesResolver, ResourceService, UsersService],
+  providers: [
+    CoursesService,
+    CoursesResolver,
+    ResourceService,
+    UsersService,
+    AuthService,
+    JwtService,
+  ],
   exports: [CoursesService],
 })
 export class CoursesModule {}
