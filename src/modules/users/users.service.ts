@@ -58,13 +58,6 @@ export class UsersService {
       throw new UserNotFoundException();
     }
 
-    console.log({
-      email,
-      newEmail,
-      firstName,
-      lastName,
-    });
-
     user = {
       ...user,
       firstName: firstName ?? user.firstName,
@@ -74,14 +67,13 @@ export class UsersService {
 
     const response = await this.userRepository
       .save(user)
-      .then((updated) => {
-        console.log(user?.password);
-        return this.authService
-          .logIn({ email: updated.email, password: user?.password })
-          .catch(console.log);
-      })
-      .catch((error) => {
-        console.log(error);
+      .then((updated) =>
+        this.authService.logIn({
+          email: updated.email,
+          password: user?.password,
+        }),
+      )
+      .catch(() => {
         throw new UpdateFailed();
       });
 
