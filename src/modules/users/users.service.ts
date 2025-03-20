@@ -4,9 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities';
 import { CreateUserDto } from './dto';
 import { UpdateFailed, UserNotFoundException } from '../../common';
-import { handlePasswordDecryption } from '../auth/helpers';
 import { AuthService } from '../auth';
-import { StepsService } from '../steps';
 
 @Injectable()
 export class UsersService {
@@ -65,7 +63,7 @@ export class UsersService {
       email: newEmail ?? user.email,
     };
 
-    const response = await this.userRepository
+    return await this.userRepository
       .save(user)
       .then((updated) =>
         this.authService.logIn({
@@ -76,9 +74,5 @@ export class UsersService {
       .catch(() => {
         throw new UpdateFailed();
       });
-
-    console.log('response:', response);
-
-    return response;
   }
 }
