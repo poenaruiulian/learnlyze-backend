@@ -40,6 +40,7 @@ export class StepsService {
     step.description = createStepDto.description;
     step.completed = false;
     step.generation = createStepDto.generation;
+    step.hasChild = createStepDto.hasChild ?? false;
 
     return await this.stepRepository.save(step);
   }

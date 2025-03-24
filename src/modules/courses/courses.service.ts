@@ -91,6 +91,7 @@ export class CoursesService {
         parentStep: null,
         resources: resourcesIds,
         generation: 0,
+        hasChild: false,
       };
 
       const savedStep = await this.stepService.create(createStepDto);
@@ -298,9 +299,6 @@ export class CoursesService {
       const copiedStep = await this.stepService.findOneById(stepId);
       if (!copiedStep) throw new Error(`Step ${stepId} not found`);
 
-      // Copy sub-steps in a structured manner
-      await this.copySubStepsRecursively(stepId);
-
       // Copy the main step (the parent step)
       const newStep = await this.stepService.create({
         parentStep: copiedStep.parentStep ?? null,
@@ -309,8 +307,12 @@ export class CoursesService {
         title: copiedStep.title,
         description: copiedStep.description,
         generation: copiedStep.generation,
+        hasChild: copiedStep.hasChild,
       });
       newStepsIds.push(newStep.id);
+
+      // Copy sub-steps in a structured manner
+      await this.copySubStepsRecursively(stepId, newStep.id);
     }
 
     // Create the new enrolled course
@@ -333,19 +335,22 @@ export class CoursesService {
     To refresh the steps for the new course of the user we need to copy the steps and create a new set of steps with fresh states.
     The function below does this recursively to handle all the sub-steps of the step.
    */
-  private async copySubStepsRecursively(parentStepId: number) {
+  private async copySubStepsRecursively(
+    parentStepId: number,
+    newStepId: number,
+  ) {
     const subSteps = await this.stepService.findByParentId(parentStepId);
     return Promise.all(
       subSteps.map(async (subStep) => {
         const newSubStep = await this.stepService.create({
-          parentStep: subStep.parentStep ?? null,
+          parentStep: newStepId ?? null,
           resources: subStep.resources,
           priority: subStep.priority,
           title: subStep.title,
           description: subStep.description,
           generation: subStep.generation,
         });
-        await this.copySubStepsRecursively(newSubStep.id);
+        await this.copySubStepsRecursively(newSubStep.id, newSubStep.id);
         return newSubStep;
       }),
     );

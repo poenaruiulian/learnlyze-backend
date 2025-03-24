@@ -5,4 +5,5 @@ export type CreateStepDto = {
   title: string;
   description: string;
   generation: number;
+  hasChild?: boolean;
 };

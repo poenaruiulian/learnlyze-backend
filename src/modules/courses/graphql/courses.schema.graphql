@@ -11,6 +11,7 @@ type Course {
     steps: [Int]
     completed: Boolean
     enrolledId: Int
+    numberOfEnrollments: Int
 }
 
 type FullCourse {
