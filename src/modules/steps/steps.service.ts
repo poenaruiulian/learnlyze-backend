@@ -241,6 +241,25 @@ export class StepsService {
     }
 
     foundStep.hasChild = true;
+
+    // If the user creates a set of sub-steps for a completed step, the step should not be notated as completed
+    // So we de-complete it
+    foundStep.completed = false;
+
+    // If the step has a parent we will un-complete the parent too
+    // to ensure clearer visibility for step completion state
+    if (foundStep.parentStep) {
+      const foundStepParent = await this.stepRepository.findOneBy({
+        id: foundStep.parentStep,
+      });
+
+      if (foundStepParent) {
+        await this.stepRepository.save({
+          ...foundStepParent,
+          completed: false,
+        });
+      }
+    }
     await this.stepRepository.save(foundStep);
 
     return insertedSteps;
