@@ -153,9 +153,21 @@ export class CoursesService {
     }
 
     if (props.search) {
-      courses = courses.filter((courses) =>
-        courses.title.startsWith(props.search!),
-      );
+      courses = courses.filter((course) => {
+        const startsWith = course.title
+          .toLowerCase()
+          .startsWith(props.search!.toLowerCase());
+        const anyStartsWith = course.title
+          .split(' ')
+          .some((word) =>
+            word.toLowerCase().startsWith(props.search!.toLowerCase()),
+          );
+        const contains = course.title
+          .toLowerCase()
+          .includes(props.search!.toLowerCase());
+
+        return startsWith || anyStartsWith || contains;
+      });
     }
 
     return courses;
