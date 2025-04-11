@@ -14,6 +14,7 @@ const bootstrap = async () => {
     throw new Error('JWT_SECRET is not set in the environment variables');
   }
 
-  await app.listen(3000);
+  const port = configService.get<string>('PORT') || 3000;
+  await app.listen(port);
 };
 bootstrap();
