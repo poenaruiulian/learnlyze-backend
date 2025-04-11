@@ -16,7 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             url: databaseUrl,
             ssl: { rejectUnauthorized: false },
             entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-            synchronize: false,
+            synchronize: true,
           };
         }
 
